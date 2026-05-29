@@ -1,0 +1,158 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <p-toast></p-toast>
+            <p-toolbar styleClass="mb-4">
+                <!-- BOTÃO NOVO E EXCLUIR -->
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" 
+                                (click)="onAbrirTelaNovoRegistro()"></button>                        
+                    </div>
+                </ng-template>
+               
+            </p-toolbar>
+
+            <!-- LISTA DE REGISTROS DA TABELA -->
+            <p-table #dt [value]="listaRegistros" [columns]="cols" responsiveLayout="scroll"
+                     [rows]="10" [globalFilterFields]="['dsTipoMovimentacao','icAtivo']"
+                     [paginator]="true" [showCurrentPageReport]="true"
+                     currentPageReportTemplate="Mostrando {first} a {last} no total de {totalRecords} registros"
+                     [(selection)]="registrosSelecionados" selectionMode="multiple"
+                     [rowHover]="true" dataKey="id">
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">{{titulo}}</h5>
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onFiltragemRapida(dt, $event)" 
+                                   placeholder="Pesquisar..." class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        
+                        <th>Id</th>
+                        <th>Tipo de Movimentação</th>
+                        <th>Categoria</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-dataRegistro>
+                    <tr>                       
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Id</span>
+                            {{dataRegistro.id}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Tipo de Movimentação</span>
+                            {{dataRegistro.dsTipoMovimentacao}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Categoria</span>
+                            {{dataRegistro?.categoria.dsCategoria}}
+                        </td>
+                        <td style="width:14%; min-width: 10rem;">
+                            <span class="p-column-title">Situação</span>
+                            {{dataRegistro.icSituacao === 'SIM' ? 'Sim' : 'Não'}}
+                        </td>
+                        <td>
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" 
+                                        (click)="onEditarRegistro(dataRegistro)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" 
+                                        (click)="onConfirmarExclucaoRegistro(dataRegistro)"></button>
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-warning mr-2" 
+                                        (click)="onAbrirBancoConta(dataRegistro)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Tela para editar ou salvar novos registros -->
+        <p-dialog [(visible)]="telaRegistro" [style]="{width: '450px'}" header="Detalhe de Tipo de Movimentação" 
+                  [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <div class="field">
+                    <label for="id">Id</label>
+                    <input type="text" pInputText id="id" [(ngModel)]="registro.id" readonly/>
+                </div>
+                <div class="field">
+                    <label for="categoria">Categoria</label>
+                    <p-dropdown [options]="categorias" optionLabel="dsCategoria" optionValue="id" 
+                                [(ngModel)]="registro?.categoria.id"></p-dropdown>
+                </div>
+                <div class="field">
+                    <label for="name">Tipo de Movimentação</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="registro.dsTipoMovimentacao" required 
+                           autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !registro.dsTipoMovimentacao}"/>
+                    <small class="ng-dirty ng-invalid" *ngIf="submitted && !registro.dsTipoMovimentacao">
+                        O nome da categoria é obrigatório
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" pInputTextarea [(ngModel)]="registro.dsDescricao" 
+                              required rows="3" cols="20"></textarea>
+                </div>
+                <div class="field">
+                    <label for="status">Situação</label>
+                    <p-dropdown [(ngModel)]="registro.icSituacao" optionLabel="label" optionValue="value" 
+                                [options]="situacao" placeholder="Selecione">
+                        <ng-template pTemplate="selectedItem">
+                            <span *ngIf="registro && registro.icSituacao"> 
+                                {{ getLabelByValue(registro.icSituacao) }}
+                            </span>
+                        </ng-template>
+                        <ng-template let-option pTemplate="item">
+                            <span>{{option.label}}</span>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" 
+                        (click)="esconderCaixaDialogo()"></button>
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" 
+                        (click)="onSalvarRegistro()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Tela de confirmação para excluir registros selecionados -->
+        <p-dialog [(visible)]="telaConfirmacaoRegistroSelecionado" header="Confirmar" 
+                  [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="registro">Você tem certeza que deseja excluir este registro <b>{{registro.dsTipoMovimentacao}}</b>?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" 
+                        (click)="telaConfirmacaoRegistroSelecionado = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" 
+                        (click)="confirmarExclusaoRegistro()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Tela para excluir vários registros -->
+        <p-dialog [(visible)]="telaConfirmacaoExclusao" header="Confirmar" 
+                  [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Você tem certeza que deseja excluir todos os registros selecionados?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" 
+                        (click)="telaConfirmacaoExclusao = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" 
+                        (click)="onConfirmarExcluicaoRegistroSelecionado()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>

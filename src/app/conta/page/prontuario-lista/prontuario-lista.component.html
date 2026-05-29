@@ -1,0 +1,155 @@
+<div class="grid">
+  <div class="col-12">
+    <div class="card px-6 py-6">
+      <p-toast></p-toast>
+
+      <p-toolbar styleClass="mb-4">
+        <ng-template pTemplate="left">
+          <div class="my-2">
+            <button 
+              pButton 
+              pRipple 
+              label="Novo" 
+              icon="pi pi-plus" 
+              class="p-button-success mr-2" 
+              (click)="onAbrirTelaNovoRegistro()"
+            ></button>
+
+            <button 
+              pButton 
+              pRipple 
+              label="Excluir" 
+              icon="pi pi-trash" 
+              class="p-button-danger" 
+              (click)="onAbrirTelaConfirmacaoExclusaoRegistro()" 
+              [disabled]="!registrosSelecionados || !registrosSelecionados.length"
+            ></button>
+          </div>
+        </ng-template>
+      </p-toolbar>
+
+      <p-table 
+        #dt 
+        [value]="listaRegistros" 
+        responsiveLayout="scroll"
+        [rows]="10" 
+        [globalFilterFields]="['nome', 'avaliador', 'classificacao']" 
+        [paginator]="true" 
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} no total de {totalRecords} prontuários"
+        [(selection)]="registrosSelecionados" 
+        selectionMode="multiple" 
+        [rowHover]="true"
+        dataKey="id"
+      >
+
+        <ng-template pTemplate="caption">
+          <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <h5 class="m-0">{{titulo}}</h5>
+            <span class="block mt-2 md:mt-0 p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input 
+                pInputText 
+                type="text" 
+                (input)="onFiltragemRapida(dt, $event)" 
+                placeholder="Pesquisar..." 
+                class="w-full sm:w-auto"
+              />
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th>Id</th>
+            <th>Paciente / Nome</th>
+            <th>Data Avaliação</th>
+            <th>Avaliador</th>
+            <th>Classificação</th>
+            <th>Ações</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-dataRegistro>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="dataRegistro"></p-tableCheckbox>
+            </td>
+            <td style="width:10%; min-width:5rem;">
+              <span class="p-column-title">Id</span>
+              {{dataRegistro.id}}
+            </td>
+            <td style="width:25%; min-width:12rem;">
+              <span class="p-column-title">Paciente / Nome</span>
+              {{dataRegistro.nome}}
+            </td>
+            <td style="width:15%; min-width:10rem;">
+              <span class="p-column-title">Data Avaliação</span>
+              {{dataRegistro.dataAvaliacao | date: 'dd/MM/yyyy'}}
+            </td>
+            <td style="width:20%; min-width:10rem;">
+              <span class="p-column-title">Avaliador</span>
+              {{dataRegistro.avaliador}}
+            </td>
+            <td style="width:20%; min-width:10rem;">
+              <span class="p-column-title">Classificação</span>
+              {{dataRegistro.classificacao}}
+            </td>
+            <td>
+              <div class="flex">
+                <button 
+                  pButton 
+                  pRipple 
+                  icon="pi pi-pencil" 
+                  class="p-button-rounded p-button-success mr-2" 
+                  (click)="onEditarRegistro(dataRegistro)"
+                ></button>
+
+                <button 
+                  pButton 
+                  pRipple 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-warning mr-2" 
+                  (click)="onConfirmarExclusaoRegistro(dataRegistro)"
+                ></button>
+
+                <button 
+                  pButton 
+                  pRipple 
+                  icon="pi pi-eye" 
+                  class="p-button-rounded p-button-info" 
+                  (click)="onAbrirBancoConta(dataRegistro)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <p-dialog [(visible)]="telaConfirmacaoRegistroSelecionado" header="Confirmar" [modal]="true" [style]="{width: '450px'}">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span *ngIf="registro">Você tem certeza que deseja excluir o prontuário de <b>{{registro.nome}}</b>?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="telaConfirmacaoRegistroSelecionado = false"></button>
+        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="confirmarExclusaoRegistro()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="telaConfirmacaoExclusao" header="Confirmar" [modal]="true" [style]="{width: '450px'}">
+      <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Você tem certeza que deseja excluir todos os registros selecionados?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="telaConfirmacaoExclusao = false"></button>
+        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="onConfirmarExclusaoRegistroSelecionado()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+</div>

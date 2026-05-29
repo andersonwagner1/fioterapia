@@ -1,0 +1,480 @@
+
+
+<!--
+<p-table 
+        [value]="listaRegistros"
+        sortField="nrDia" 
+        sortMode="single" 
+       
+        rowGroupMode="subheader" 
+        groupRowsBy="nrDia" 
+        [tableStyle]="{'min-width': '60rem'}">-->
+
+<div class="card">
+    <p-table 
+        [value]="listaRegistros"
+        sortField="nrDia" 
+        sortMode="single" 
+       
+     
+        [tableStyle]="{'min-width': '60rem'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Pos</th>           
+                    
+                   <th>Tipo de Movimentação</th>
+                   <th>Valor</th>
+                   <th>Saldo</th>
+                   <th>Observação</th>
+                   <th></th>
+                   <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="groupheader" let-dataRegistro>
+                <tr pRowGroupHeader>
+                    <td colspan="7">
+                        {{dataRegistro.dtMovimentacao | date}}
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="groupfooter" let-dataRegistro>
+                <tr>
+                    <td colspan="7" class="text-right font-bold pr-6">
+                        Saldo:  {{dataRegistro.vlSaldo | moeda}}
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-dataRegistro let-rowIndex="rowIndex">
+
+                <tr [ngClass]="{
+                    'linha-amarelo': dataRegistro.icCalcular === 'NAO',
+                    'linha-vermelha': dataRegistro.tipoMovimentacao.categoria.icTipo === 'D' && dataRegistro.icCalcular === 'SIM',
+                    'linha-verde': dataRegistro.tipoMovimentacao.categoria.icTipo === 'C' && dataRegistro.icCalcular === 'SIM',
+                    'linha-azul':dataRegistro.tipoMovimentacao.categoria.icTipo === 'TC'  && dataRegistro.icCalcular === 'SIM',
+                    'linha-azul':dataRegistro.tipoMovimentacao.categoria.icTipo === 'TD'  && dataRegistro.icCalcular === 'SIM',
+                    'linha-azul':(dataRegistro.tipoMovimentacao.categoria.icTipo === 'A' || dataRegistro.tipoMovimentacao.categoria.icTipo === 'R') && dataRegistro.icCalcular === 'SIM'
+                  
+                }">
+
+                
+                    <td>
+                        {{dataRegistro.nrDia}}
+                    </td>
+                    <td>
+                        {{dataRegistro.id}} - {{dataRegistro.tipoMovimentacao.dsTipoMovimentacao}} -  ({{dataRegistro.tipoMovimentacao.categoria.icTipo}})
+                    </td>
+                    <td>
+                        <div *ngIf="dataRegistro.vlCredito > 0">
+                            {{dataRegistro.vlCredito | moeda}}
+                        </div>
+                        <div *ngIf="dataRegistro.vlDebito > 0">
+                          - {{dataRegistro.vlDebito| moeda}}
+                        </div>
+                    </td>
+                    <td>
+                        {{dataRegistro.vlSaldo | moeda}}
+                    </td>
+                    <td>
+                        <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TC'; else outrasOpcoes">
+                            Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                            <button [routerLink]="['/pagina', 'param1', 'param2', 'param3', 'param4']">Ir para Página</button>
+                        </div>
+                        <ng-template #outrasOpcoes>
+                            <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TD'; else outrasOpcoes2">
+                                Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                              
+                            </div>
+                        </ng-template>
+                        <ng-template #outrasOpcoes2>
+                            <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'A'; else outrasOpcoes3">
+                                Aplicação na conta:
+                                {{dataRegistro.vinculado.bancoConta.banco.id}}
+                                {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                <ng *ngIf="dataRegistro.investimento != null">
+                                    -  [{{dataRegistro.investimento.dsInvestimento}}]
+                                </ng>
+
+                                <ng *ngIf="dataRegistro.investimento == null">
+                                    (SELECIONE O CODIGO DO INVESTIMENTO)
+                                </ng>
+                             
+                              
+                            </div>
+                        </ng-template>
+                        <ng-template #outrasOpcoes3>
+                            <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'R'; else defaultOption">
+                                Resgatado na conta:
+                                {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                <ng *ngIf="dataRegistro.investimento != null">
+                                    -  [{{dataRegistro.investimento.dsInvestimento}}]
+                                </ng>
+
+                                <ng *ngIf="dataRegistro.investimento == null">
+                                    (SELECIONE O CODIGO DO INVESTIMENTO)
+                                </ng>
+                            </div>
+                        </ng-template>
+                        <ng-template #defaultOption>
+                            {{dataRegistro.dsObservacao}}
+                        </ng-template>
+                       
+                    </td>
+                    <td>
+                        <div class="flex" >
+                        <div *ngIf="
+                            (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'CREDITO')
+                            ||(dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'DEBITO')
+                            ||(dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'APLICACAO' && dataRegistro.vlDebito > 0.0)
+                            || (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'TRANSFERENCIA' && dataRegistro.vlDebito > 0.0)
+                            || (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'RESGATE' && dataRegistro.vlCredito > 0.0)
+                            "
+                            
+                            >
+                            
+                            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="onEditarRegistroMovimentacao(dataRegistro)"></button>                           
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="onConfirmarExclucaoRegistro(dataRegistro)"></button>
+
+                            <div *ngIf="
+                        
+                            (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'APLICACAO')
+                            || (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'TRANSFERENCIA')
+                            || (dataRegistro.tipoMovimentacao.icTipoMovimentacao == 'RESGATE')
+                            "
+                            
+                            >
+                            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-info" (click)="onIrPara(dataRegistro)"></button>
+                            </div>
+                            
+                           
+
+                        </div>
+
+                        
+                       
+                    </div>
+                    </td>
+                </tr>
+            </ng-template>
+    </p-table>
+</div>
+
+<!--
+        <div class="card px-6 py-6">
+
+            <p-table [value]="listaRegistros" dataKey="id" 
+                rowGroupMode="subheader" 
+                groupRowsBy="nrDia" 
+                sortField="nrDia" 
+            editMode="row" [tableStyle]="{'min-width': '50rem'}">
+
+
+
+                <ng-template pTemplate="header">
+                    <tr>
+                       
+                        <th>Pos</th>           
+                        <th>Dia</th>
+                       <th>Tipo de Movimentação</th>
+                       <th>Valor</th>
+                       <th>Saldo</th>
+                       <th>Observação</th>
+                       <th></th>
+                       <th></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="groupheader" let-dataRegistro>
+                    <tr pRowGroupHeader>
+                        <td colspan="5">
+                            {{dataRegistro.nrDia}}    
+                        </td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="groupfooter" let-dataRegistro>
+                    <tr>
+                        <td colspan="5" class="text-right font-bold pr-6">
+                            Total Customers: 6
+                        </td>
+                    </tr>
+                </ng-template>
+
+                
+                <ng-template pTemplate="rowexpansion" let-dataRegistro let-editing="editing" let-ri="rowIndex">
+                    <tr [pEditableRow]="dataRegistro">
+                        <td>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <p-inputNumber pInput [(ngModel)]="dataRegistro.nrPosicao"/>
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{dataRegistro.nrPosicao}}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <p-inputNumber pInput [(ngModel)]="dataRegistro.nrDia"/>
+                                   </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{dataRegistro.nrDia}}
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <input 
+                                        pInputText type="text" 
+                                        [(ngModel)]="dataRegistro.tipoMovimentacao.dsTipoMovimentacao"
+                                        required />
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    {{dataRegistro.id}} - {{dataRegistro.tipoMovimentacao.dsTipoMovimentacao}} -  ({{dataRegistro.tipoMovimentacao.categoria.icTipo}})
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <p-inputNumber pInput [(ngModel)]="dataRegistro.vlCredito"/>
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                                    <div *ngIf="dataRegistro.vlCredito > 0">
+                                        {{dataRegistro.vlCredito | moeda}}
+                                    </div>
+                                    <div *ngIf="dataRegistro.vlDebito > 0">
+                                      - {{dataRegistro.vlDebito| moeda}}
+                                    </div>
+                                </ng-template>
+                            </p-cellEditor>
+                        </td>
+                        <td>
+                            {{dataRegistro.vlSaldo | moeda}}
+                        </td>
+                        <td>
+                            <p-cellEditor>
+                                <ng-template pTemplate="input">
+                                    <textarea id="description" pInputTextarea [(ngModel)]="dataRegistro.dsObservacao" required rows="3" cols="20"></textarea>
+                                </ng-template>
+                                <ng-template pTemplate="output">
+                
+
+                            <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TC'; else outrasOpcoes">
+                                Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                            </div>
+                            <ng-template #outrasOpcoes>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TD'; else outrasOpcoes2">
+                                    Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                </div>
+                            </ng-template>
+                            <ng-template #outrasOpcoes2>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'A'; else outrasOpcoes3">
+                                    Aplicação na conta:
+                                    {{dataRegistro.vinculado.bancoConta.banco.id}}
+                                    {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                    {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                 
+                                    <a [routerLink]="['/outra-pagina']">Ir para outra página</a>
+                                </div>
+                            </ng-template>
+                            <ng-template #outrasOpcoes3>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'R'; else defaultOption">
+                                    Resgatado na conta:
+                                    {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                    {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                    
+                                    <a [routerLink]="['/pages/movimentacao',
+                                    dataRegistro.competencia.nrMes,
+                                    dataRegistro.competencia.nrAno,
+                                    dataRegistro.vinculado.bancoConta.banco.id,
+                                    dataRegistro.vinculado.bancoConta.conta.id]">Ir para pagaina</a>
+                                </div>
+                            </ng-template>
+                            <ng-template #defaultOption>
+                                {{dataRegistro.dsObservacao}}
+                            </ng-template>
+                        </ng-template>
+                    </p-cellEditor>
+
+                        </td>
+                        <td>
+                            <div class="flex align-items-center justify-content-center gap-2">
+                                <button 
+                                    *ngIf="!editing" 
+                                    pButton 
+                                    pRipple 
+                                    type="button" 
+                                    pInitEditableRow 
+                                    icon="pi pi-pencil" 
+                                    (click)="onRowEditInit(product)" 
+                                    class="p-button-rounded p-button-text">
+                                </button>
+                                <button 
+                                    *ngIf="editing" 
+                                    pButton 
+                                    pRipple 
+                                    type="button" 
+                                    pSaveEditableRow 
+                                    icon="pi pi-check" 
+                                    (click)="onRowEditSave(product)" 
+                                    class="p-button-rounded p-button-text p-button-success mr-2">
+                                </button>
+                                <button 
+                                    *ngIf="editing" 
+                                    pButton pRipple 
+                                    type="button" 
+                                    pCancelEditableRow 
+                                    icon="pi pi-times" 
+                                    (click)="onRowEditCancel(product, ri)" 
+                                    class="p-button-rounded p-button-text p-button-danger">
+                                </button>
+                                <button *ngIf="editing"
+                                    pButton pRipple 
+                                    pCancelEditableRow
+                                    icon="pi pi-trash" 
+                                    class="p-button-rounded p-button-warning" 
+                                    (click)="onConfirmarExclucaoRegistro(dataRegistro)">
+                                </button>
+                    
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+
+
+
+            <p-table #dt [value]="listaRegistros" [columns]="cols" responsiveLayout="scroll"
+            [rows]="15" 
+            currentPageReportTemplate="Mostrando {first} a {last} no total de {totalRecords} registros"
+            >
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">{{titulo}}</h5>
+                        <label>Mostrar Excluidos</label>
+			            <p-inputSwitch [(ngModel)]="mostrarRegistroExcluir" (click)="onMostrarExcluido()"></p-inputSwitch>
+                        <button pButton pRipple icon="pi pi-update" class="p-button-rounded p-button-success mr-2" (click)="onAtualizarCalculo()"></button>
+                        <button pButton pRipple icon="pi-money-bill" class="p-button-rounded p-button-success mr-2" (click)="onAbrirTelaSaldo()"></button>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                       
+                        <th>Dia</th>
+                        <th>Tipo de Movimentação</th>
+                        <th>Valor</th>
+                        <th>Saldo</th>
+                        <th>Observação</th>
+                        <th></th>
+                        <th></th>
+                        <th>Pos</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-dataRegistro>
+
+                    <tr [ngClass]="{
+                        'linha-vermelha': dataRegistro.tipoMovimentacao.categoria.icTipo === 'D' && dataRegistro.icCalcular === 'SIM',
+                        'linha-verde': dataRegistro.tipoMovimentacao.categoria.icTipo === 'C' && dataRegistro.icCalcular=== 'SIM',
+                        'linha-azul': (dataRegistro.tipoMovimentacao.categoria.icTipo === 'TC'
+                                       || dataRegistro.tipoMovimentacao.categoria.icTipo === 'R'
+                                       || dataRegistro.tipoMovimentacao.categoria.icTipo === 'TD'
+                                       || dataRegistro.tipoMovimentacao.categoria.icTipo === 'A')  && dataRegistro.icCalcular=== 'SIM',
+                        'linha-amarelo' : dataRegistro.icCalcular=== 'NAO'
+                    }">
+    
+                    
+                        
+                        <td>{{dataRegistro.nrDia}}</td>
+                        <td >{{dataRegistro.id}} - {{dataRegistro.tipoMovimentacao.dsTipoMovimentacao}} -  ({{dataRegistro.tipoMovimentacao.categoria.icTipo}})</td>                       
+                        <td>
+                            <div *ngIf="dataRegistro.vlCredito > 0">
+                                {{dataRegistro.vlCredito | moeda}}
+                            </div>
+                            <div *ngIf="dataRegistro.vlDebito > 0">
+                              - {{dataRegistro.vlDebito| moeda}}
+                            </div>
+
+                        </td>
+                        <td>{{dataRegistro.vlSaldo | moeda}}</td>
+                        <td>
+                            <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TC'; else outrasOpcoes">
+                                Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                            </div>
+                            <ng-template #outrasOpcoes>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'TD'; else outrasOpcoes2">
+                                    Valor recebido pela conta: {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} - {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                </div>
+                            </ng-template>
+                            <ng-template #outrasOpcoes2>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'A'; else outrasOpcoes3">
+                                    Aplicação na conta:
+                                    {{dataRegistro.vinculado.bancoConta.banco.id}}
+                                    {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                    {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                 
+                                    <a [routerLink]="['/outra-pagina']">Ir para outra página</a>
+                                </div>
+                            </ng-template>
+                            <ng-template #outrasOpcoes3>
+                                <div *ngIf="dataRegistro.tipoMovimentacao.categoria.icTipo === 'R'; else defaultOption">
+                                    Resgatado na conta:
+                                    {{dataRegistro.vinculado.bancoConta.banco.dsBanco}} -
+                                    {{dataRegistro.vinculado.bancoConta.conta.dsConta}}
+                                 
+                                    <a [routerLink]="['/pages/movimentacao',
+                                    dataRegistro.competencia.nrMes,
+                                    dataRegistro.competencia.nrAno,
+                                    dataRegistro.vinculado.bancoConta.banco.id,
+                                    dataRegistro.vinculado.bancoConta.conta.id]">Ir para pagaina</a>
+                                </div>
+                            </ng-template>
+                            <ng-template #defaultOption>
+                                {{dataRegistro.dsObservacao}}
+                            </ng-template>
+                        <td>
+                            
+                            <td>
+                                <div class="flex">
+                                   
+                                    <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="onEditarRegistroMovimentacao(dataRegistro)"></button>
+                                    
+                                    <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="onConfirmarExclucaoRegistro(dataRegistro)"></button>
+                                </div>
+                            </td>
+                            <td>{{dataRegistro.nrPosicao}}</td>
+    
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+    -->
+-
+        <p-dialog [(visible)]="telaConfirmacaoRegistroSelecionado" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="registro">Você tem certeze que deseja excluir este banco <b>{{registro.dsBanco}}</b>?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="Não" (click)="excluirTela = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Sim" (click)="onExcluirRegistro()" ></button>
+            </ng-template>
+        </p-dialog>
+    
+        
+        <p-dialog [(visible)]="telaCalcularSaldo" >
+            <div class="p-fluid p-formgrid grid" >
+                <div class="field col-12 md:col-6">
+                    <label htmlFor="dia">Saldo Final</label>
+                    <p-inputNumber mode="decimal" locale="de-DE" [minFractionDigits]="2" [(ngModel)]="vlSaldoFinal"></p-inputNumber>
+                </div>
+        
+                <div class="field col-12 md:col-6">
+                    <button pButton pRipple type="button" label="Calcular" class="p-button-primary mr-2 mb-2" (click)="onGerarSaldoFinal()"></button>
+                </div>
+            </div>
+        </p-dialog>

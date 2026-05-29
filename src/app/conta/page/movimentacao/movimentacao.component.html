@@ -1,0 +1,13 @@
+<!-- MENSAGEM DE ERROS -->
+<p-toast></p-toast>
+
+
+
+<app-selecionar-data (evtDataSelecionada)="evReceberData($event)" [dataSelecionada]="registro.competencia"></app-selecionar-data>
+<app-selecionar-banco-conta (evtBancoContaSelecionado)="evReceberBancoConta($event)" [data]="registro.competencia" [bancoContaSelecionado]="registro.bancoConta"></app-selecionar-banco-conta>
+
+<div *ngIf="registro.bancoConta">
+    <app-saldo  [competencia]="registro.competencia" [bancoConta]="registro.bancoConta" (evtDataSelecionada)="evReceberData($event)"></app-saldo>
+    <app-registrar [registro]="registro" (evAtualizar)="evAtualizarMovimentacao($event)" [provisorio]="provisorio" [permitirNovosRegistro]=""></app-registrar>
+    <app-tabela-movimentacao [bancoConta]="registro.bancoConta" [competencia]="registro.competencia" (evtRegistroMovimentacao)="evRegistroMovimento($event)"></app-tabela-movimentacao>
+</div>   

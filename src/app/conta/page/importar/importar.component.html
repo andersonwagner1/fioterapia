@@ -1,0 +1,324 @@
+<p-toast></p-toast> 
+
+
+<div class="flex-1">
+        <p-panel header="Clientes">
+            <p-table [value]="migracoes" [responsiveLayout]="'scroll'">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 50px;">Banco/Conta</th>
+                        <th style="width: 100px;">Jan</th>
+                        <th style="width: 120px;">Fev</th>
+                        <th style="width: 120px;">Mar</th>
+                        <th style="width: 120px;">Abr</th>
+                        <th style="width: 120px;">Mai</th>
+                        <th style="width: 120px;">Jun</th>
+                        <th style="width: 120px;">Jul</th>
+                        <th style="width: 120px;">Ago</th>
+                        <th style="width: 120px;">Set</th>
+                        <th style="width: 120px;">Out</th>
+                        <th style="width: 120px;">Nov</th>
+                        <th style="width: 120px;">Dez</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-migrar>
+                    <tr>
+                        <td>{{ migrar[0] }}</td>
+                        <td>{{ migrar[1] }}</td>
+                        <td>{{ migrar[2] }}</td>
+                        <td>{{ migrar[3] }}</td>
+                        <td>{{ migrar[4] }}</td>
+                        <td>{{ migrar[5] }}</td>
+                        <td>{{ migrar[6] }}</td>
+                        <td>{{ migrar[7] }}</td>
+                        <td>{{ migrar[8] }}</td>
+                        <td>{{ migrar[9] }}</td>
+                        <td>{{ migrar[10] }}</td>
+                        <td>{{ migrar[11] }}</td>
+                        <td>{{ migrar[12] }}</td>
+                     
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-panel>
+    </div>
+
+
+
+<h2 class="mb-3">Importar CSV</h2>
+
+<div class="mb-4">
+  <label class="p-button p-component p-fileupload-choose" for="csv-file-upload">
+    <span class="p-button-icon pi pi-file-excel"></span>
+    <span class="p-button-label">Escolher Arquivo CSV</span>
+  </label>
+  <input 
+    id="csv-file-upload"
+    type="file" 
+    (change)="onFileSelected($event)" 
+    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+    class="p-inputtext p-component"
+    style="display: none;"
+  />
+</div>
+
+
+<p-card header="Filtros de Importação" class="mb-4">
+    <div class="flex flex-wrap gap-4 items-end">
+        <div class="p-field flex-1">
+            <label for="tipo">Tipo</label>
+            <p-dropdown 
+              id="tipo"
+              [options]="tiposConta"           
+              [(ngModel)]="filtro.bancoConta" 
+              (ngModelChange)="carregarDadosRelacionados()" 
+              placeholder="Selecione o tipo"
+              [style]="{'width': '100%'}">
+            </p-dropdown>
+        </div>
+
+        <div class="p-field" style="width: 100px;">
+            <label for="mes">Mês</label>
+            <input 
+              id="mes" 
+              type="number" 
+              min="1" max="12" 
+              pInputText 
+              [(ngModel)]="filtro.nrMes" 
+              (ngModelChange)="carregarDadosRelacionados()" 
+            />
+        </div>
+
+        <div class="p-field" style="width: 100px;">
+            <label for="ano">Ano</label>
+            <input 
+              id="ano" 
+              type="number" 
+              min="1900" max="2100" 
+              pInputText 
+              [(ngModel)]="filtro.nrAno" 
+              (ngModelChange)="carregarDadosRelacionados()" 
+            />
+        </div>
+
+        <div class="flex gap-2">
+            <button 
+              pButton 
+              type="button" 
+              label="Importar" 
+              icon="pi pi-upload" 
+              (click)="importarDados()"
+              class="p-button-primary">
+            </button>
+            <button 
+              pButton 
+              type="button" 
+              label="Filtrar" 
+              icon="pi pi-filter" 
+              (click)="carregarDadosRelacionados()"
+              class="p-button-secondary">
+            </button>
+        </div>
+    </div>
+</p-card>
+
+---
+
+<div class="flex gap-4 mb-4">
+
+    <div class="flex-1">
+        <p-panel header="Clientes">
+            <p-table [value]="clientes" [responsiveLayout]="'scroll'">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th style="width: 100px;">Data</th>
+                        <th style="width: 120px;">Valor</th>
+                        <th>Descrição</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-cliente>
+                    <tr [ngClass]="getRowClassCliente(cliente.id)">
+                        <td>{{ cliente.id }}</td>
+                        <td>{{ cliente.data }}</td>
+                        <td>{{ cliente.valor | currency:'BRL' }}</td>
+                        <td>{{ cliente.descricao }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-panel>
+    </div>
+
+    <div class="flex-1">
+        <p-panel header="Cliente X Pedido" >
+            <div class="mb-3">
+                <button 
+                    pButton 
+                    type="button" 
+                    label="Adicionar Relação" 
+                    icon="pi pi-plus" 
+                    (click)="adicionarRelacao()"
+                    class="p-button-outlined p-button-sm">
+                </button>
+            </div>
+
+            <p-table [value]="relacoes" [responsiveLayout]="'scroll'">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 30%;">ID Cliente</th>
+                        <th style="width: 30%;">ID Pedido</th>
+                        <th style="width: 40%;">Ações</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-relacao let-rowIndex="rowIndex">
+                    <tr>
+                        <td>
+                            <input 
+                                type="number" 
+                                pInputText 
+                                [(ngModel)]="relacao.idCliente" 
+                                (ngModelChange)="onIdChange()" 
+                                placeholder="ID Cliente"
+                            />
+                        </td>
+                        <td>
+                            <input 
+                                type="number" 
+                                pInputText 
+                                [(ngModel)]="relacao.idPedido" 
+                                (ngModelChange)="onIdChange()"
+                                
+                                placeholder="ID Pedido"
+                            />
+                        </td>
+                        <td class="flex justify-content-center">
+                            <button 
+                                pButton 
+                                type="button" 
+                                icon="pi pi-times" 
+                                class="p-button-danger p-button-text p-button-sm"
+                                pTooltip="Remover Relação"
+                                tooltipPosition="top"
+                                (click)="removerRelacao(rowIndex)">
+                            </button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <button pButton icon="pi pi-check" (click)="salvarRelacoes()" label="Salvar" class="p-button-success"></button>
+        </p-panel>
+    </div>
+
+    <div class="flex-1">
+        <p-panel header="Pedidos">
+            <p-table [value]="pedidos" [responsiveLayout]="'scroll'">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th>Descrição</th>
+                    <th style="width: 120px;">Data Mov.</th>
+                    <th style="width: 120px;">Valor</th>
+                    <th style="width: 60px;">Ação</th> 
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-pedido>
+                <tr [ngClass]="getRowClassPedido(pedido.id)">
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.descricao }}</td>
+                    <td>{{ pedido.dataMovimentacao }}</td>
+                    <td>{{ pedido.valor  | currency:'BRL' }}</td>
+                    <td class="flex justify-content-center">
+                        <button 
+                            pButton 
+                            type="button" 
+                            icon="pi pi-plus" 
+                            class="p-button-rounded p-button-success p-button-text p-button-sm" 
+                            (click)="abrirModalCliente(pedido)"
+                            pTooltip="Adicionar como Cliente"
+                            tooltipPosition="left">
+                        </button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        </p-panel>
+    </div>
+
+</div>
+
+<p-dialog 
+    header="Novo Registro de Importação" 
+    [(visible)]="mostrarModalCliente" 
+    [modal]="true" 
+    [style]="{ width: '50vw' }"
+    [draggable]="false"
+    [resizable]="false">
+
+    <div class="p-fluid p-formgrid grid">
+        
+        <div class="field col-12 md:col-6">
+            <label for="nrDia">Dia (Nº)</label>
+            <input 
+                id="nrDia" 
+                type="number" 
+                pInputText 
+                [(ngModel)]="reg.nrDia" 
+            />
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label for="valor">Valor</label>
+            <p-inputNumber 
+                id="valor" 
+                [(ngModel)]="reg.vlCredito" 
+                mode="currency" 
+                currency="BRL" 
+                locale="pt-BR">
+            </p-inputNumber>
+        </div>
+
+        <div class="field col-12 md:col-6">
+            <label for="tipoMovimentacao">Tipo de Movimentação</label>
+            <p-dropdown 
+                id="tipoMovimentacao" 
+                [filter]="true"
+                [options]="tipoMovimentacoes" 
+                optionLabel="dsTipoMovimentacao" 
+                optionValue="id" 
+                placeholder="Selecione o Tipo" 
+                [(ngModel)]="reg.idTipoMovimentacao">
+            </p-dropdown>
+        </div>
+
+        <div class="field col-12 md:col-6">
+
+
+            <label for="transferencia">Transferência</label>
+<label for="transferirPara">Transferir Para / Receber De</label>
+                <p-dropdown optionLabel="label" optionValue="transferirPara" [options]="listarBancosParaTransferencia"
+                    placeholder="Selecione o destino/origem"  [filter]="true"  (onChange)="onSelecionarTransferencia()" [(ngModel)]="transferenciaSeleciado">
+                </p-dropdown>
+        </div>
+
+        <div class="col-12 field">
+                <label for="tipoInvestimento">Aplicar Em / Resgatar De</label>
+                <p-dropdown optionLabel="label" optionValue="valor" [options]="listarInvestimentos"
+                    placeholder="Selecione o Investimento" [filter]="true" [(ngModel)]="tipoInvestimento" > </p-dropdown>
+            </div>
+        <div class="field col-12">
+            <label for="observacao">Observação</label>
+            <textarea 
+                id="observacao" 
+                pInputTextarea 
+                rows="3" 
+                [(ngModel)]="reg.dsObservacao">
+            </textarea>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton icon="pi pi-times" (click)="mostrarModalCliente=false" label="Cancelar" class="p-button-text"></button>
+        <button pButton icon="pi pi-check" (click)="salvarPedido()" label="Salvar" class="p-button-success"></button>
+    </ng-template>
+
+</p-dialog>

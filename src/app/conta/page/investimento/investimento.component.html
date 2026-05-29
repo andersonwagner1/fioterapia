@@ -1,0 +1,118 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <p-toast></p-toast>
+            
+            <!-- Barra de ferramentas -->
+            <p-toolbar styleClass="mb-4">
+                <div class="p-toolbar-group-left">
+                    <h4>Cadastro de Tipos de Investimentos (SELIC 2023/2024 etc.)</h4>
+                </div>
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" 
+                                (click)="onAbrirTelaNovoRegistro()"></button>                        
+                    </div>
+                </ng-template>
+            </p-toolbar>
+
+            <!-- Tabela de registros -->
+            <p-table #dt [value]="listaRegistros" [columns]="cols" responsiveLayout="scroll"
+                     [rows]="10" [globalFilterFields]="['bancoConta.banco.dsBanco', 'icAtivo']"
+                     [paginator]="true" [showCurrentPageReport]="true"
+                     currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+                     [(selection)]="registrosSelecionados" selectionMode="multiple"
+                     [rowHover]="true" dataKey="id">
+                
+                <!-- Título e Filtro -->
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">{{titulo}}</h5>
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="onFiltragemRapida(dt, $event)" 
+                                   placeholder="Pesquisar..." class="w-full sm:w-auto"/>
+                        </span>
+                    </div>
+                </ng-template>
+
+                <!-- Cabeçalho da tabela -->
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Id</th>
+                        <th>Banco</th>
+                        <th>Descrição</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
+                    </tr>
+                </ng-template>
+
+                <!-- Corpo da tabela -->
+                <ng-template pTemplate="body" let-dataRegistro>
+                    <tr>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Id</span>
+                            {{dataRegistro.id}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Banco</span>
+                            {{dataRegistro.bancoConta.banco.dsBanco}} - {{dataRegistro.bancoConta.conta.dsConta}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            {{dataRegistro.dsInvestimento}}
+                        </td>
+                        <td style="width:14%; min-width:10rem;">
+                            <span class="p-column-title">Situação</span>
+                            {{dataRegistro.icSituacao === 'SIM' ? 'Sim' : 'Não'}}
+                        </td>
+                        <td>
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" 
+                                        (click)="onEditarRegistro(dataRegistro)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" 
+                                        (click)="onConfirmarExclusaoRegistro(dataRegistro)"></button>
+                                <button pButton pRipple icon="pi pi-external-link" class="p-button-rounded p-button-info mr-2" 
+                                        (click)="onAbrirBancoConta(dataRegistro)"></button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Modal de registro (criar/editar) -->
+        <p-dialog [(visible)]="telaRegistro" [style]="{width: '450px', height: '600px'}" header="Detalhes do Tipo de Investimento" 
+                  [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <div class="field">
+                    <label for="id">Id</label>
+                    <input type="text" pInputText id="id" [(ngModel)]="registro.id" readonly/>
+                </div>
+                
+                <div class="field">
+                    <label for="dsInvestimento">Tipo de Movimentação</label>
+                    <input type="text" pInputText id="dsInvestimento" [(ngModel)]="registro.dsInvestimento" required/>
+                </div>
+
+                <div class="field">
+                    <label for="icSituacao">Situação</label>
+                    <p-dropdown [(ngModel)]="registro.icSituacao" optionLabel="label" optionValue="value" 
+                                [options]="situacao" placeholder="Selecione"></p-dropdown>
+                </div>
+
+                <div class="field">
+                    <label for="bancoConta">Banco</label>
+                    <p-dropdown [(ngModel)]="registro?.bancoConta.id" optionLabel="contaBanco" optionValue="id" 
+                                [options]="listarBancosInvestimentoAtivos" placeholder="Selecione"></p-dropdown>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" 
+                        (click)="esconderCaixaDialogo()"></button>
+                <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" 
+                        (click)="onSalvarRegistro()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>

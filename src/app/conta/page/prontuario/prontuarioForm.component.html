@@ -512,141 +512,239 @@
 
 <p-tabPanel header="Avaliação Postural / ALBERTA">
   
-  <div class="surface-section border-round p-3 mb-4">
+  <div class="surface-section border-round p-3 mb-4 border-1 surface-border">
     <div class="text-900 font-medium text-xl mb-3 border-bottom-1 surface-border pb-2">
       <i class="pi pi-eye mr-2 text-primary"></i>Observações da Avaliação Postural
     </div>
     
     <div class="field">
-      <label for="alinhamentoEstatico">Alinhamento Estático e Assimetrias</label>
+      <label for="alinhamentoEstatico" class="font-bold">Alinhamento Estático e Assimetrias</label>
       <small class="block text-secondary mb-2">(Deformidades cranianas, preferência rotacional cervical, assimetria de pregas, inclinação pélvica...)</small>
-      <textarea 
-        id="alinhamentoEstatico" 
-        pInputTextarea 
-        [(ngModel)]="registro.alinhamentoEstatico" 
-        rows="3"
-      ></textarea>
+      <textarea id="alinhamentoEstatico" pInputTextarea [(ngModel)]="registro.alinhamentoEstatico" rows="2"></textarea>
     </div>
 
     <div class="field">
-      <label for="controleCervicalTronco">Controle Cervical e de Tronco</label>
+      <label for="controleCervicalTronco" class="font-bold">Controle Cervical e de Tronco</label>
       <small class="block text-secondary mb-2">(Grau de sustentação, oscilações, retificações ou bloqueios escapulares/pélvicos...)</small>
-      <textarea 
-        id="controleCervicalTronco" 
-        pInputTextarea 
-        [(ngModel)]="registro.controleCervicalTronco" 
-        rows="3"
-      ></textarea>
+      <textarea id="controleCervicalTronco" pInputTextarea [(ngModel)]="registro.controleCervicalTronco" rows="2"></textarea>
     </div>
 
     <div class="field">
-      <label for="tonusMuscular">Tônus Muscular e Mobilidade</label>
+      <label for="tonusMuscular" class="font-bold">Tônus Muscular e Mobilidade</label>
       <small class="block text-secondary mb-2">(Sinais de hipotonia, hipertonia, restrições de ADM ativa ou passiva...)</small>
-      <textarea 
-        id="tonusMuscular" 
-        pInputTextarea 
-        [(ngModel)]="registro.tonusMuscular" 
-        rows="3"
-      ></textarea>
+      <textarea id="tonusMuscular" pInputTextarea [(ngModel)]="registro.tonusMuscular" rows="2"></textarea>
     </div>
   </div>
 
-  <div class="surface-section border-round p-3">
-    <div class="text-900 font-medium text-xl mb-3 border-bottom-1 surface-border pb-2">
-      <i class="pi pi-chart-line mr-2 text-primary"></i>Escala Motora Infantil de Alberta (AIMS)
+  <div class="surface-section border-round p-3 border-1 surface-border">
+    <div class="text-900 font-medium text-xl mb-4 border-bottom-1 surface-border pb-2 flex justify-content-between align-items-center">
+      <span><i class="pi pi-chart-line mr-2 text-primary"></i>Escala Motora Infantil de Alberta (AIMS)</span>
+      <span class="text-sm bg-blue-100 text-primary-900 font-bold px-3 py-1 border-round">Escore Máximo Total: 58 pts</span>
     </div>
 
-    <div class="grid">
-      <div class="field col-12 md:col-3">
-        <label for="scoreProno">Prono (Bruços)</label>
-        <p-inputNumber 
-          id="scoreProno" 
-          [(ngModel)]="registro.scoreProno" 
-          [min]="0" [max]="21" 
-          placeholder="Max: 21"
-          (onInput)="calcularTotalAlberta()"
-        ></p-inputNumber>
+    <div class="mb-5">
+      <div class="flex justify-content-between align-items-center bg-gray-100 p-2 border-round mb-3">
+        <span class="font-bold text-900"><i class="pi pi-chevron-right text-primary mr-1"></i> 1. Subescala Prono (De Bruços)</span>
+        <span class="p-tag p-tag-info font-bold">Subtotal: {{ registro.scoreProno || 0 }} / 22 pts</span>
       </div>
-
-      <div class="field col-12 md:col-3">
-        <label for="scoreSupino">Supino (Costas)</label>
-        <p-inputNumber 
-          id="scoreSupino" 
-          [(ngModel)]="registro.scoreSupino" 
-          [min]="0" [max]="9" 
-          placeholder="Max: 9"
-          (onInput)="calcularTotalAlberta()"
-        ></p-inputNumber>
-      </div>
-
-      <div class="field col-12 md:col-3">
-        <label for="scoreSentado">Sentado</label>
-        <p-inputNumber 
-          id="scoreSentado" 
-          [(ngModel)]="registro.scoreSentado" 
-          [min]="0" [max]="12" 
-          placeholder="Max: 12"
-          (onInput)="calcularTotalAlberta()"
-        ></p-inputNumber>
-      </div>
-
-      <div class="field col-12 md:col-3">
-        <label for="scoreEmPe">Em Pé</label>
-        <p-inputNumber 
-          id="scoreEmPe" 
-          [(ngModel)]="registro.scoreEmPe" 
-          [min]="0" [max]="16" 
-          placeholder="Max: 16"
-          (onInput)="calcularTotalAlberta()"
-        ></p-inputNumber>
+      <div class="grid">
+        <div *ngFor="let item of listaMarcosProno" class="col-12 sm:col-6 md:col-4 lg:col-3">
+          <div class="card border-1 surface-border border-round p-3 cursor-pointer flex align-items-center justify-content-between h-full"
+            [ngClass]="{'border-primary bg-blue-50 shadow-1': isMarcoSelecionado('prono', item.valor), 'hover:border-400': !isMarcoSelecionado('prono', item.valor)}"
+            (click)="onAlternarMarco('prono', item)">
+            <div class="flex align-items-center gap-3 pr-2">
+              <p-checkbox [binary]="true" [checked]="isMarcoSelecionado('prono', item.valor)" (onChange)="onAlternarMarco('prono', item)"></p-checkbox>
+              <div class="flex flex-column">
+                <span class="font-medium text-sm text-900 line-height-2">{{ item.descricao }}</span>
+                <span class="text-xs text-secondary mt-1">Ref: <span class="text-pink-700 font-medium">{{ item.tempoMin }}</span><span *ngIf="item.tempoMin !== '-'"> a </span><span class="text-teal-700 font-medium">{{ item.tempoMax }}</span></span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-primary bg-blue-100 px-2 py-1 border-round white-space-nowrap">{{ item.valor }} pts</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="grid mt-2 bg-bluegray-50 border-round p-2 align-items-center">
-      <div class="field col-12 md:col-4 mb-0">
-        <label class="font-bold block text-primary">Escore Bruto Total (AIMS)</label>
-        <p-inputNumber 
-          id="scoreTotalAlberta" 
-          [(ngModel)]="registro.scoreTotalAlberta" 
-          disabled
-          placeholder="Calculado: Max 58"
-        ></p-inputNumber>
+    <div class="mb-5">
+      <div class="flex justify-content-between align-items-center bg-gray-100 p-2 border-round mb-3">
+        <span class="font-bold text-900"><i class="pi pi-chevron-right text-primary mr-1"></i> 2. Subescala Supino (De Costas)</span>
+        <span class="p-tag p-tag-info font-bold">Subtotal: {{ registro.scoreSupino || 0 }} / 9 pts</span>
+      </div>
+      <div class="grid">
+        <div *ngFor="let item of listaMarcosSupino" class="col-12 sm:col-6 md:col-4 lg:col-3">
+          <div class="card border-1 surface-border border-round p-3 cursor-pointer flex align-items-center justify-content-between h-full"
+            [ngClass]="{'border-primary bg-blue-50 shadow-1': isMarcoSelecionado('supino', item.valor), 'hover:border-400': !isMarcoSelecionado('supino', item.valor)}"
+            (click)="onAlternarMarco('supino', item)">
+            <div class="flex align-items-center gap-3 pr-2">
+              <p-checkbox [binary]="true" [checked]="isMarcoSelecionado('supino', item.valor)" (onChange)="onAlternarMarco('supino', item)"></p-checkbox>
+              <div class="flex flex-column">
+                <span class="font-medium text-sm text-900 line-height-2">{{ item.descricao }}</span>
+                <span class="text-xs text-secondary mt-1">Ref: <span class="text-pink-700 font-medium">{{ item.tempoMin }}</span><span *ngIf="item.tempoMin !== '-'"> a </span><span class="text-teal-700 font-medium">{{ item.tempoMax }}</span></span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-primary bg-blue-100 px-2 py-1 border-round white-space-nowrap">{{ item.valor }} pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-5">
+      <div class="flex justify-content-between align-items-center bg-gray-100 p-2 border-round mb-3">
+        <span class="font-bold text-900"><i class="pi pi-chevron-right text-primary mr-1"></i> 3. Subescala Sentado</span>
+        <span class="p-tag p-tag-info font-bold">Subtotal: {{ registro.scoreSentado || 0 }} / 12 pts</span>
+      </div>
+      <div class="grid">
+        <div *ngFor="let item of listaMarcosSentado" class="col-12 sm:col-6 md:col-4 lg:col-3">
+          <div class="card border-1 surface-border border-round p-3 cursor-pointer flex align-items-center justify-content-between h-full"
+            [ngClass]="{'border-primary bg-blue-50 shadow-1': isMarcoSelecionado('sentado', item.valor), 'hover:border-400': !isMarcoSelecionado('sentado', item.valor)}"
+            (click)="onAlternarMarco('sentado', item)">
+            <div class="flex align-items-center gap-3 pr-2">
+              <p-checkbox [binary]="true" [checked]="isMarcoSelecionado('sentado', item.valor)" (onChange)="onAlternarMarco('sentado', item)"></p-checkbox>
+              <div class="flex flex-column">
+                <span class="font-medium text-sm text-900 line-height-2">{{ item.descricao }}</span>
+                <span class="text-xs text-secondary mt-1">Ref: <span class="text-pink-700 font-medium">{{ item.tempoMin }}</span><span *ngIf="item.tempoMin !== '-'"> a </span><span class="text-teal-700 font-medium">{{ item.tempoMax }}</span></span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-primary bg-blue-100 px-2 py-1 border-round white-space-nowrap">{{ item.valor }} pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-5">
+      <div class="flex justify-content-between align-items-center bg-gray-100 p-2 border-round mb-3">
+        <span class="font-bold text-900"><i class="pi pi-chevron-right text-primary mr-1"></i> 4. Subescala Em Pé</span>
+        <span class="p-tag p-tag-info font-bold">Subtotal: {{ registro.scoreEmPe || 0 }} / 16 pts</span>
+      </div>
+      <div class="grid">
+        <div *ngFor="let item of listaMarcosEmPe" class="col-12 sm:col-6 md:col-4 lg:col-3">
+          <div class="card border-1 surface-border border-round p-3 cursor-pointer flex align-items-center justify-content-between h-full"
+            [ngClass]="{'border-primary bg-blue-50 shadow-1': isMarcoSelecionado('emPe', item.valor), 'hover:border-400': !isMarcoSelecionado('emPe', item.valor)}"
+            (click)="onAlternarMarco('emPe', item)">
+            <div class="flex align-items-center gap-3 pr-2">
+              <p-checkbox [binary]="true" [checked]="isMarcoSelecionado('emPe', item.valor)" (onChange)="onAlternarMarco('emPe', item)"></p-checkbox>
+              <div class="flex flex-column">
+                <span class="font-medium text-sm text-900 line-height-2">{{ item.descricao }}</span>
+                <span class="text-xs text-secondary mt-1">Ref: <span class="text-pink-700 font-medium">{{ item.tempoMin }}</span><span *ngIf="item.tempoMin !== '-'"> a </span><span class="text-teal-700 font-medium">{{ item.tempoMax }}</span></span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-primary bg-blue-100 px-2 py-1 border-round white-space-nowrap">{{ item.valor }} pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid mt-4 bg-bluegray-50 border-round p-3 align-items-center border-1 surface-border">
+      <div class="field col-12 md:col-4">
+        <label class="font-bold block text-900 mb-2">Escore Bruto Total (AIMS)</label>
+        <p-inputNumber id="scoreTotalAlberta" [(ngModel)]="registro.scoreTotalAlberta" disabled placeholder="Calculado: Max 58" class="w-full"></p-inputNumber>
       </div>
 
-      <div class="field col-12 md:col-4 mb-0">
-        <label for="percentilAlberta" class="font-bold block text-primary">Percentil (%)</label>
-        <input 
-          type="text" 
-          pInputText 
-          id="percentilAlberta" 
-          [(ngModel)]="registro.percentilAlberta" 
-          placeholder="Ex: 50º"
-        />
+      <div class="field col-12 md:col-4">
+        <label for="percentilAlberta" class="font-bold block text-900 mb-2">Percentil (%)</label>
+        <p-inputNumber id="percentilAlberta" [(ngModel)]="registro.percentilAlberta" min="1" max="100" suffix="º" placeholder="Ex: 45º" (onInput)="onCalcularClassificacaoAlberta()"></p-inputNumber>
       </div>
 
-      <div class="field col-12 md:col-4 mb-0">
-        <label for="classificacaoAlberta" class="font-bold block text-primary">Classificação do Percentil</label>
-        <input 
-          type="text" 
-          pInputText 
-          id="classificacaoAlberta" 
-          [(ngModel)]="registro.classificacaoAlberta" 
-          placeholder="Ex: Desenvolvimento Normal"
-        />
+      <div class="field col-12 md:col-4">
+        <label for="classificacaoAlberta" class="font-bold block text-900 mb-2">Classificação do Percentil</label>
+        <input type="text" pInputText id="classificacaoAlberta" [(ngModel)]="registro.classificacaoAlberta" disabled placeholder="Definido pelo Percentil" class="w-full font-bold" />
       </div>
     </div>
 
     <div class="field mt-4">
-      <label for="obsAlberta">Análise Qualitativa dos Itens Observados (AIMS)</label>
-      <small class="block text-secondary mb-2">(Janela de desenvolvimento observada, comportamento motor atípico, padrões de compensação...)</small>
-      <textarea 
-        id="obsAlberta" 
-        pInputTextarea 
-        [(ngModel)]="registro.obsAlberta" 
-        rows="4"
-      ></textarea>
+      <label for="obsAlberta" class="font-bold">Análise Qualitativa Global (AIMS)</label>
+      <textarea id="obsAlberta" pInputTextarea [(ngModel)]="registro.obsAlberta" rows="3" placeholder="Janela de desenvolvimento observada, comportamento motor atípico, etc..."></textarea>
     </div>
   </div>
+</p-tabPanel>
+
+
+
+<p-tabPanel header="Histórico do Paciente">
+  
+  <div class="flex justify-content-between align-items-center mb-3 mt-2">
+    <h6 class="m-0 font-bold text-900">Histórico de Atendimentos Realizados</h6>
+    <button 
+      *ngIf="!exibindoFormEvolucao"
+      pButton pRipple 
+      label="Nova Evolução / Sessão" 
+      icon="pi pi-plus" 
+      class="p-button-sm p-button-primary"
+      (click)="onNovaEvolucao()"
+    ></button>
+  </div>
+
+  <div *ngIf="exibindoFormEvolucao" class="surface-card border-1 surface-border border-round p-4 mb-4 bg-yellow-50 shadow-1 animate-fadein">
+    <div class="flex justify-content-between align-items-center mb-3 pb-2 border-bottom-1 surface-border">
+      <span class="font-bold text-primary"><i class="pi pi-plus-circle mr-2"></i>Registrar Nova Sessão</span>
+      <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-secondary" (click)="exibindoFormEvolucao = false"></button>
+    </div>
+
+    <div class="grid align-items-center mb-3">
+      <div class="field col-12 md:col-4 mb-0">
+        <label class="font-bold">Data da Consulta</label>
+        <p-calendar [(ngModel)]="novaEvolucao.dataConsulta" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+      </div>
+      <div class="field col-12 md:col-8 mb-0">
+        <label class="font-bold block mb-1">Fisioterapeuta</label>
+        <div class="text-900 font-medium p-2 border-round surface-200 bg-white border-1 surface-border">{{ profissionalLogado }}</div>
+      </div>
+    </div>
+
+    <div class="field mb-3">
+      <label class="font-bold">Como Chegou</label>
+      <textarea pInputTextarea [(ngModel)]="novaEvolucao.comoChegou" rows="3"></textarea>
+    </div>
+
+    <div class="field mb-3">
+      <label class="font-bold">Procedimento Realizado</label>
+      <textarea pInputTextarea [(ngModel)]="novaEvolucao.procedimento" rows="4"></textarea>
+    </div>
+
+    <div class="field mb-3">
+      <label class="font-bold">Como Saiu</label>
+      <textarea pInputTextarea [(ngModel)]="novaEvolucao.comoSaiu" rows="3"></textarea>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button pButton label="Cancelar" class="p-button-text p-button-secondary p-button-sm" (click)="exibindoFormEvolucao = false"></button>
+      <button pButton label="Confirmar Inclusão" icon="pi pi-check" class="p-button-success p-button-sm" (click)="onConfirmarInclusaoEvolucao()"></button>
+    </div>
+  </div>
+
+  <p-table 
+    [value]="registro.historicoEvolucoes || []" 
+    responsiveLayout="scroll" 
+    styleClass="p-datatable-striped p-datatable-sm border-1 surface-border"
+    [rows]="5" 
+    [paginator]="true"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 15%">Data</th>
+        <th style="width: 20%">Profissional</th>
+        <th style="width: 20%">Como Chegou</th>
+        <th style="width: 30%">Procedimento</th>
+        <th style="width: 15%">Como Saiu</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-evo>
+      <tr>
+        <td><strong>{{ evo.dataConsulta | date: 'dd/MM/yyyy' }}</strong></td>
+        <td>{{ evo.fisioterapeuta }}</td>
+        <td class="text-ellipse">{{ evo.comoChegou }}</td>
+        <td class="text-ellipse">{{ evo.procedimento }}</td>
+        <td class="text-ellipse">{{ evo.comoSaiu }}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center p-4 text-secondary">
+          Nenhum histórico de atendimento registrado para este paciente.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
 
 </p-tabPanel>
 

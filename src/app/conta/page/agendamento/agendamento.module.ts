@@ -16,18 +16,19 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { InputMaskModule } from 'primeng/inputmask';
 
-import { ProntuarioFormRoutingModule } from './prontuarioForm-routing.module';
+import { AgendamentoRoutingModule} from './agendamento-routing.module';
 
 import { PanelModule } from 'primeng/panel';
 import { TabViewModule } from 'primeng/tabview'; 
 // Aproveite e verifique se o Calendar e o InputNumber que usamos também estão aqui:
 import { CalendarModule } from 'primeng/calendar';
-import { ProntuarioFormComponent } from './prontuarioForm.component';
+import { AgendamentoComponent } from './agendamento.component';
+
 
 @NgModule({
     imports: [
         CommonModule,
-        ProntuarioFormRoutingModule,
+        AgendamentoRoutingModule,
         TableModule,
         FileUploadModule,
         FormsModule,
@@ -49,8 +50,8 @@ import { ProntuarioFormComponent } from './prontuarioForm.component';
     DropdownModule,     // <-- Adicione aqui para o sexo
     InputNumberModule   // <-- Adicione aqui para o peso/comprimento
     ],
-    declarations: [ProntuarioFormComponent]
+    declarations: [AgendamentoComponent]
 })
-export class ProntuarioFormModule { }
+export class AgendamentoModule { }
 
 

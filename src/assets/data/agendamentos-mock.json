@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "prontuarioId": 1,
+    "nomePaciente": "João Silva",
+    "dataHoraInicio": "2026-06-03T09:00:00",
+    "status": "Confirmado",
+    "tipoSessao": "Avaliação Escala Alberta"
+  },
+  {
+    "id": 2,
+    "prontuarioId": 2,
+    "nomePaciente": "Maria Eduarda",
+    "dataHoraInicio": "2026-06-04T14:30:00",
+    "status": "Agendado",
+    "tipoSessao": "Evolução Fisioterapêutica"
+  },
+  {
+    "id": 3,
+    "prontuarioId": 1,
+    "nomePaciente": "João Silva",
+    "dataHoraInicio": "2026-06-08T10:00:00",
+    "status": "Cancelado",
+    "tipoSessao": "Evolução Fisioterapêutica"
+  },
+  {
+    "id": 4,
+    "prontuarioId": 3,
+    "nomePaciente": "Pedro Henrique",
+    "dataHoraInicio": "2026-05-28T11:00:00",
+    "status": "Finalizado",
+    "tipoSessao": "Avaliação Inicial"
+  }
+]

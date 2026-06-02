@@ -21,7 +21,7 @@ import { RippleModule } from 'primeng/ripple';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DialogModule } from 'primeng/dialog';
 
-
+import { CalendarModule } from 'primeng/calendar';
 
 @NgModule({
     imports: [
@@ -42,6 +42,7 @@ import { DialogModule } from 'primeng/dialog';
     RippleModule,
     SelectButtonModule,
     DialogModule,
+    CalendarModule
     
 ],
     declarations: [PainelComponent]

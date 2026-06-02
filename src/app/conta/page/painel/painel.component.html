@@ -1,462 +1,146 @@
-<div class="grid">
+<div class="p-4 bg-gray-100 min-h-screen">
+  
+  <div class="mb-4">
+    <h1 class="text-3xl font-bold text-gray-800 m-0">Painel Clínico</h1>
+    <p class="text-gray-600 mt-1">Visão geral dos atendimentos e indicadores de fisioterapia.</p>
+  </div>
 
-    <!-- Seção de Filtros de Competência (Ano/Mês) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <div class="grid">
-                <div class="col-3 md:col-3">
-                    <label for="ano">Ano</label>            
-                    <input 
-                        type="text"
-                        pInputText 
-                        placeholder="Ano"
-                        [(ngModel)]="competenciaSelecionado.nrAno" 
-                         
-                    />
-                </div>
-                <div class="col-3 md:col-3">
-                    <label for="mes">Mês</label>
-                    <input 
-                        type="text"
-                        pInputText 
-                        placeholder="Mês"
-                        [(ngModel)]="competenciaSelecionado.nrMes" 
-                    />
-                </div>
-                <div class="col-3 md:col-3 flex align-items-end">
-                    <p-button 
-                        label="Atualizar" 
-                        icon="pi pi-refresh" 
-                        (click)="mostrarIncosistencia()"
-                    ></p-button>
-                </div>
-            </div>
+  <div class="grid col-12 p-0 mb-4">
+    
+    <div class="col-12 md:col-3 p-2">
+      <div class="card p-3 border-round shadow-1 bg-white flex justify-content-between align-items-center">
+        <div>
+          <span class="block text-500 font-medium mb-2">Total de Crianças</span>
+          <div class="text-900 font-bold text-3xl">{{ totalPacientesCadastrados }}</div>
         </div>
+        <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem; height:2.5rem">
+          <i class="pi pi-users text-blue-500 text-xl"></i>
+        </div>
+      </div>
     </div>
 
-    <!-- Tabela de Finanças (Movimentação Final) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Finanças</h5>
-            <p-table 
-                #dtMovimentacao
-                [value]="tabelaMovimentacaoFinal"                 
-                [rows]="50" 
-                [globalFilterFields]="['tipoErro', 'nrMes', 'nrAno', 'bancoConta']"
-                responsiveLayout="scroll">
-
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th rowspan="2">Mês</th>
-                        <th colspan="5">Entrada</th>
-                        <th colspan="5">Saída</th>
-                        <th colspan="3">Movimentação</th>                         
-                        <th>Conta Corrente</th>
-                    </tr>
-                    <tr>
-                        <th>Anterior</th>
-                        <th>Salário+</th>
-                        <th>Crédito</th>
-                        <th>Rendimento</th>
-                        <th>Total Entrada</th>
-                        
-                        <th>Mensal</th>
-                        <th>Cartão</th>
-                        <th>Débitos</th>
-                        <th>Total Saída</th>
-
-                        <th>Lucro</th>
-                        
-                        <th>Resgate</th>
-                        <th>Aplicação</th>  
-                        <th>Transferencia</th>                                         
-                        <th>Sobrou</th>
-                    </tr>
-                </ng-template>
-
-                <!-- input #credito type="hidden" value="0" removido -->
-                <ng-template pTemplate="body" let-mov>
-                    <!--
-                        Estrutura do array 'mov' (índices):
-                        [1] Salário+ | [2] Crédito | [3] Rendimento | [5] Mensal | [6] Cartão | [7] Débitos | [8] Rendimento (-)
-                        [9] Total Saída | [10] Resgate | [11] Aplicação | [12] Mês
-                    -->
-                    <tr>
-                        <td>{{mov[0] }}</td> <!-- Mês -->
-                        <td><p-button label="{{mov[1] | moeda}}" [link]="true" /></td>
-                        <!-- Colunas de Entrada -->
-                        <td>
-                            <p-button label="{{mov[2] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('RENDA', mov[12])"/>
-                        </td>
-                        <td><p-button label="{{mov[3] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('CREDITO', mov[0])"/></td>
-                        <td><p-button label="{{mov[4] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('RENDIMENTO', mov[0])"/></td>
-                        <td>{{mov[5] | moeda}}</td> <!-- Total Entrada -->
-
-                        <!-- Colunas de Saída -->
-                        <td><p-button label="{{mov[6] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('MENSAL', mov[0])"/></td>
-                        <td><p-button label="{{mov[7] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('CARTAO', mov[0])"/></td>
-                        <td><p-button label="{{mov[8] | moeda}}" [link]="true" (click)="onDetalheMovimentacao('DEBITO', mov[0])"/></td>                            
-                        
-                        <td>{{mov[9] | moeda}}</td> <!-- Total Saída -->
-
-                        <!-- Colunas de Movimentação/Resultado -->
-                        <td>{{mov[10] | moeda}}</td> <!-- Lucro (Total Entrada - Total Saída) -->
-
-                        <td>{{mov[11] | moeda}}</td> <!-- Resgate -->
-                        <td>{{mov[12] | moeda}}</td> <!-- Aplicação -->
-                        <td>{{mov[13] + mov[0] | moeda}}</td> <!-- trasnsfrencia -->
-                        <td>
-                            <!-- Sobrou (Lucro - Aplicação + Resgate) -->
-                            <p-button 
-                                label="{{mov[14] | moeda}}" 
-                                [link]="true" 
-                                (click)="onDetalheMovimentacao('SALDO', mov[0])" 
-                            />
-                            <!-- <p-button label="{{ mov[0] + mov[4] - mov[9] + (mov[10] - mov[11])| moeda}}" [link]="true" (click)="onDetalheMovimentacao('SALDO', mov[12])" /> removido -->
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>            
+    <div class="col-12 md:col-3 p-2">
+      <div class="card p-3 border-round shadow-1 bg-white flex justify-content-between align-items-center">
+        <div>
+          <span class="block text-500 font-medium mb-2">Agendados (Mês)</span>
+          <div class="text-900 font-bold text-3xl">{{ consultasMes }}</div>
+        </div>
+        <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem; height:2.5rem">
+          <i class="pi pi-calendar text-purple-500 text-xl"></i>
+        </div>
+      </div>
     </div>
 
-    <!-- Diálogo de Detalhes da Movimentação -->
-    <p-dialog 
-        header="Detalhes" 
-        [(visible)]="detalheRelatorio" 
-        [modal]="true" 
-        [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" 
-        [style]="{ width: '50vw' }" 
-        [draggable]="false" 
-        [resizable]="false">
+    <div class="col-12 md:col-3 p-2">
+      <div class="card p-3 border-round shadow-1 bg-white flex justify-content-between align-items-center">
+        <div>
+          <span class="block text-500 font-medium mb-2">Confirmados / Concluídos</span>
+          <div class="text-900 font-bold text-3xl text-green-600">{{ consultasConfirmadas }}</div>
+        </div>
+        <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem; height:2.5rem">
+          <i class="pi pi-check-circle text-green-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-3 p-2">
+      <div class="card p-3 border-round shadow-1 bg-white flex justify-content-between align-items-center">
+        <div>
+          <span class="block text-500 font-medium mb-2">Faltas / Cancelados</span>
+          <div class="text-900 font-bold text-3xl text-red-600">{{ consultasCanceladas }}</div>
+        </div>
+        <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width:2.5rem; height:2.5rem">
+          <i class="pi pi-times-circle text-red-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid col-12 p-0">
+    
+    <div class="col-12 lg:col-5 p-2">
+      <div class="card p-4 border-round shadow-1 bg-white h-full">
+        <h3 class="text-gray-800 font-semibold mb-3">
+          <i class="pi pi-calendar-clock mr-2 text-primary"></i>Distribuição Mensal
+        </h3>
         
-        <p-table [value]="relatorioDetalhe">           
-            <ng-template pTemplate="header">                       
-                <tr>
-                    <th>Data</th>
-                    <th>Tipo</th>
-                    <th>Valor</th>
-                    <th>Observação</th>                   
-                </tr>
-            </ng-template>
-            
-            <ng-template pTemplate="body" let-mov>
-                <tr>
-                    <td>{{mov.dtMovimentacao | date}}</td>
-                    <td>{{mov.tipoMovimentacao == null ? mov.bancoConta.banco.dsBanco : mov.tipoMovimentacao.dsTipoMovimentacao}}</td>
-                    <td>
-                        {{mov.vlDebito === 0.0 ? (mov.vlCredito | moeda)  : (mov.vlDebito | moeda)}}
-                        <i class="pi pi-angle-double-up" style="color: blue"></i>
-                        <i class="pi pi-angle-double-down" style="color: red"></i>
-                    </td>
-                    <td>{{mov.dsObservacao}}</td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </p-dialog>
-
-    <!-- Tabela de Saldo Final Real (Por Banco e Mês) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Saldo Final</h5>
-            <p-table 
-                #dtSaldoFinal
-                [value]="tabelaBancoFinalReal" 
-                [paginator]="true" 
-                [rows]="50" 
-                [globalFilterFields]="['tipoErro', 'nrMes', 'nrAno', 'bancoConta']"
-                responsiveLayout="scroll">
-                
-                <ng-template pTemplate="caption">
-                    <div class="flex">
-                        <p-iconField iconPosition="left" class="ml-auto">
-                            <p-inputIcon>
-                                <i class="pi pi-search"></i>
-                            </p-inputIcon>
-                            <input 
-                                pInputText 
-                                type="text" 
-                                (input)="dtSaldoFinal.filterGlobal($event.target.value, 'contains')" 
-                                placeholder="Buscar palavra-chave" />
-                        </p-iconField>
-                    </div>
-                </ng-template>
-
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Banco</th>
-                        <th>Janeiro</th>
-                        <th>Fevereiro</th>
-                        <th>Março</th>
-                        <th>Abril</th>
-                        <th>Maio</th>
-                        <th>Junho</th>
-                        <th>Julho</th>
-                        <th>Agosto</th>
-                        <th>Setembro</th>
-                        <th>Outubro</th>
-                        <th>Novembro</th>
-                        <th>Dezembro</th>
-                    </tr>
-                </ng-template>
-                
-                <ng-template pTemplate="body" let-mov>
-                    <tr>
-                        <td>{{mov.dsBanco}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[0] === false}">{{mov.vlMes[0] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[1] === false}">{{mov.vlMes[1] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[2] === false}">{{mov.vlMes[2] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[3] === false}">{{mov.vlMes[3]| moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[4] === false}">{{mov.vlMes[4] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[5] === false}">{{mov.vlMes[5] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[6] === false}">{{mov.vlMes[6] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[7] === false}">{{mov.vlMes[7] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[8] === false}">{{mov.vlMes[8] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[9] === false}">{{mov.vlMes[9] | moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[10] === false}">{{mov.vlMes[10]| moeda}}</td>
-                        <td [ngClass]="{'bg-purple-100': mov.icFinalizado[11] === false}">{{mov.vlMes[11]| moeda}}</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>            
-    </div>
+       <p-calendar 
+  [(ngModel)]="dataAtual" 
+  [inline]="true" 
+  styleClass="w-full shadow-0 border-none">
+  
+  <ng-template pTemplate="date" let-date>
+    <div class="flex flex-column align-items-center justify-content-center w-full h-full p-1 position-relative"
+         [ngClass]="{
+           'bg-blue-50 text-blue-700 border-circle font-bold': verificarSePossuiAgendamentoNoDia(date),
+           'bg-red-50 text-red-700 border-circle font-bold': verificarSePossuiCancelamentoNoDia(date)
+         }"
+         [title]="obterDicaTooltipPacientes(date)">
       
-    <!-- Cards de Resumo Financeiro (Capital Acumulado, Débitos, Cartão) -->
-    <!-- Card 1: Capital Acumulado -->
-    <div class="col-12 lg:col-6 xl:col-3">
-        <div class="card mb-0">
-            <div class="flex justify-content-between mb-3">
-                <div>
-                    <span class="block text-500 font-medium mb-3">Capital Acumulado</span>
-                    <div class="text-900 font-medium text-xl">{{saldo[0][0] | moeda}}</div>
-                </div>                    
-            </div>
-            <span class="text-green-500 font-medium"></span>
-            <span class="text-500">{{saldo[0][0] / saldo[1][0] * 100 - 100 | porcentagem }} diferença do primeiro</span>
-        </div>
+      <span>{{ date.day }}</span>
+      
+      <span *ngIf="verificarSePossuiAgendamentoNoDia(date)" 
+            class="block bg-blue-500 border-circle" 
+            style="width: 5px; height: 5px; margin-top: 2px;">
+      </span>
+      <span *ngIf="verificarSePossuiCancelamentoNoDia(date) && !verificarSePossuiAgendamentoNoDia(date)" 
+            class="block bg-red-500 border-circle" 
+            style="width: 5px; height: 5px; margin-top: 2px;">
+      </span>
+    </div>
+  </ng-template>
+
+        </p-calendar>
+      </div>
     </div>
 
-    <!-- Card 2: Débitos -->
-    <div class="col-12 lg:col-6 xl:col-3">
-        <div class="card mb-0">
-            <div class="flex justify-content-between mb-3">
-                <div>
-                    <span class="block text-500 font-medium mb-3">Débitos</span>
-                    <div class="text-900 font-medium text-xl">{{saldo[2][0] | moeda}}</div>
-                </div>                    
-            </div>
-            <span class="text-green-500 font-medium"></span>
-            <span class="text-500">{{saldo[3][0] / saldo[2][0] * 100 - 100 | porcentagem }} diferença do primeiro</span>
-        </div>
+    <div class="col-12 lg:col-7 p-2">
+      <div class="card p-4 border-round shadow-1 bg-white h-full">
+  <h3 class="text-gray-800 font-semibold mb-3">
+    <i class="pi pi-list mr-2 text-primary"></i>Fluxo de Atendimento Geral
+  </h3>
+  
+  <p-table [value]="listaAgendamentos" [rows]="4" [paginator]="true" [loading]="loading" responsiveLayout="scroll" class="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Data/Hora</th>
+        <th>Paciente</th>
+        <th>Procedimento</th>
+        <th>Status</th>
+        <th style="width: 5rem" class="text-center">Ações</th> </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-agenda>
+      <tr>
+        <td>{{ agenda.dataHoraInicio | date: 'dd/MM - HH:mm' }}</td>
+        <td><strong>{{ agenda.nomePaciente }}</strong></td>
+        <td class="text-sm">{{ agenda.tipoSessao }}</td>
+        <td>
+          <span class="text-xs font-bold px-2 py-1 border-round"
+                [ngClass]="{
+                  'bg-green-100 text-green-700': agenda.status === 'Confirmado' || agenda.status === 'Finalizado',
+                  'bg-blue-100 text-blue-700': agenda.status === 'Agendado',
+                  'bg-red-100 text-red-700': agenda.status === 'Cancelado'
+                }">
+            {{ agenda.status }}
+          </span>
+        </td>
+        <td class="text-center">
+          <button 
+            pButton 
+            pRipple 
+            icon="pi pi-folder-open" 
+            class="p-button-rounded p-button-text p-button-info"
+            pTooltip="Abrir Prontuário"
+            tooltipPosition="left"
+            [disabled]="!agenda.prontuarioId"
+            (click)="irParaProntuario(agenda.prontuarioId)">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
     </div>
 
-    <!-- Card 3: Cartão de Crédito -->
-    <div class="col-12 lg:col-6 xl:col-3">
-        <div class="card mb-0">
-            <div class="flex justify-content-between mb-3">
-                <div>
-                    <span class="block text-500 font-medium mb-3">Cartão de Crédito</span>
-                    <div class="text-900 font-medium text-xl">{{saldo[4][0] | moeda}}</div>
-                </div>                    
-            </div>
-            <span class="text-green-500 font-medium"></span>
-            <span class="text-500">{{saldo[5][0] / saldo[4][0] * 100 - 100 | porcentagem }} diferença do primeiro</span>
-        </div>
-    </div>
-
-    <!-- Card 4: Cartão de Crédito Mês Atual -->
-    <div class="col-12 lg:col-6 xl:col-3">
-        <div class="card mb-0">
-            <div class="flex justify-content-between mb-3">
-                <div>
-                    <span class="block text-500 font-medium mb-3">Cartão de Crédito Mês Atual</span>
-                    <div class="text-900 font-medium text-xl">{{saldo[6][0] | moeda}}</div>
-                </div>                    
-            </div>
-            <span class="text-green-500 font-medium"></span>
-            <span class="text-500">{{saldo[7][0] / saldo[6][0] * 100 - 100 | porcentagem }} diferença do primeiro</span>
-        </div>
-    </div>
-
-    <!-- Gráfico Sankey (Mantido Intacto) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Gráfico Sankey</h5>
-            <p-chart
-                type="sankey"
-                [data]="chartData2"
-                [options]="chartOptions2"
-                style="height: 1200px; width: 400px;">
-            </p-chart>
-        </div>
-    </div>
-
-    <!-- Gráfico Movimentação -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Movimentação</h5>
-            <p-chart type="bar" [data]="chartData" [options]="chartOptions"></p-chart>
-        </div>
-    </div>
-
-    <!-- Gráfico Crédito -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Crédito</h5>
-            <p-chart type="bar" [data]="chartCreditos" [options]="chartOptionsStrack"></p-chart>
-        </div>
-    </div>
-
-    <!-- Gráfico Crescimento -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Crescimento</h5>
-            <p-chart type="line" [data]="chartDataCrescimento" [options]="chartOptions" class="h-[30rem]"></p-chart>                
-        </div>
-    </div>
-
-    <!-- Tabela de Valores Finais (Diferença Mensal) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Valores Finais (Diferença Mensal)</h5>
-            <p-table 
-                #dtValoresFinais
-                [value]="tabelaBancoFinal" 
-                [paginator]="true" 
-                [rows]="50" 
-                [globalFilterFields]="['tipoErro', 'nrMes', 'nrAno', 'bancoConta']"
-                responsiveLayout="scroll">
-                
-                <ng-template pTemplate="caption">
-                    <div class="flex">
-                        <p-iconField iconPosition="left" class="ml-auto">
-                            <p-inputIcon>
-                                <i class="pi pi-search"></i>
-                            </p-inputIcon>
-                            <input 
-                                pInputText 
-                                type="text" 
-                                (input)="dtValoresFinais.filterGlobal($event.target.value, 'contains')" 
-                                placeholder="Buscar palavra-chave" />
-                        </p-iconField>
-                    </div>
-                </ng-template>
-
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Banco</th>
-                        <th>Janeiro</th>
-                        <th>Fevereiro</th>
-                        <th>Março</th>
-                        <th>Abril</th>
-                        <th>Maio</th>
-                        <th>Junho</th>
-                        <th>Julho</th>
-                        <th>Agosto</th>
-                        <th>Setembro</th>
-                        <th>Outubro</th>
-                        <th>Novembro</th>
-                        <th>Dezembro</th>
-                    </tr>
-                </ng-template>
-                
-                <ng-template pTemplate="body" let-mov>
-                    <tr>
-                        <td>{{mov[0]}}</td>
-                        <td>{{mov[1] | moeda}}</td>
-                        <td>{{mov[2] - mov[1] | moeda}}</td>
-                        <td>{{mov[3] - mov[2] | moeda}}</td>
-                        <td>{{mov[4] - mov[3] | moeda}}</td>
-                        <td>{{mov[5] - mov[4] | moeda}}</td>
-                        <td>{{mov[6] - mov[5] | moeda}}</td>
-                        <td>{{mov[7] - mov[6] | moeda}}</td>
-                        <td>{{mov[8] - mov[7] | moeda}}</td>
-                        <td>{{mov[9] - mov[8] | moeda}}</td>
-                        <td>{{mov[10] - mov[9] | moeda}}</td>
-                        <td>{{mov[11] - mov[10] | moeda}}</td>
-                        <td>{{mov[12] - mov[11] | moeda}}</td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>            
-    </div>
-
-    <!-- Tabela de Movimentação Final (Valores Iniciais/Finais) -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Movimentação Final (Valores Iniciais/Finais)</h5>
-            <p-table 
-                [value]="tabelaMovimentacaoFinal" 
-                [paginator]="true" 
-                [rows]="5" 
-                responsiveLayout="scroll">
-                
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Banco</th>
-                        <th pSortableColumn="name">Mês<p-sortIcon field="name"></p-sortIcon></th>
-                        <th>Valor Inicial</th>
-                        <th>Valor Final</th>
-                    </tr>
-                </ng-template>
-                
-                <ng-template pTemplate="body" let-mov>
-                    <tr>
-                        <td style="width: 35%; min-width: 7rem;">{{mov[0]}}</td>
-                        <td style="width: 35%; min-width: 8rem;">{{mov[2] }}</td>
-                        <td style="width: 35%; min-width: 8rem;">{{mov[3] | currency:'USD'}}</td>
-                        <td style="width: 35%; min-width: 8rem;">{{mov[4] | currency:'USD'}}</td>   
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>            
-    </div>
-
-    <!-- Tabela de Inconsistências -->
-    <div class="col-12 xl:col-12">
-        <div class="card">
-            <h5>Inconsistências</h5>
-            <p-table 
-                #dtInconsistencias
-                [value]="listaIncosistencia" 
-                [paginator]="true" 
-                [rows]="50" 
-                [globalFilterFields]="['tipoErro', 'nrMes', 'nrAno', 'bancoConta']"
-                responsiveLayout="scroll">
-                
-                <ng-template pTemplate="caption">
-                    <div class="flex">
-                        <p-iconField iconPosition="left" class="ml-auto">
-                            <p-inputIcon>
-                                <i class="pi pi-search"></i>
-                            </p-inputIcon>
-                            <input 
-                                pInputText 
-                                type="text" 
-                                (input)="dtInconsistencias.filterGlobal($event.target.value, 'contains')" 
-                                placeholder="Buscar palavra-chave" />
-                        </p-iconField>
-                    </div>
-                </ng-template>
-
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th>Tipo Erro</th>
-                        <th>Competência</th>
-                        <th>Banco/Conta</th>
-                        <th>Observação</th>
-                    </tr>
-                </ng-template>
-                
-                <ng-template pTemplate="body" let-mov>
-                    <tr>
-                        <td style="width: 30%; min-width: 7rem;">{{mov.tipoErro}}</td>
-                        <td style="width: 10%; min-width: 8rem;">{{mov.nrMes }}/{{mov.nrAno }}</td>
-                        <td style="width: 20%; min-width: 8rem;">{{mov.bancoConta }}</td>
-                        <td style="width: 40%; min-width: 8rem;">{{mov.mensagemErro }}</td>   
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>            
-    </div>
+  </div>
 </div>

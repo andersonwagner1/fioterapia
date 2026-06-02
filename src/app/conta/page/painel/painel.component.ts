@@ -1,354 +1,133 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MenuItem } from 'primeng/api'; // Mantido, pois estava no original
-import { Chart, registerables } from 'chart.js';
-import { SankeyController, Flow } from 'chartjs-chart-sankey';
-import { Subscription, debounceTime } from 'rxjs';
-import { LayoutService } from 'src/app/layout/service/app.layout.service';
-import { RelatorioService} from '../../service/relatorioService';
-import { MovimentacaoService } from '../../service/movimentacao.service';
-import { IMovimentacao } from '../../model/i-movimentacao';
-import { ICompetencia } from '../../model/i-competencia';
+import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { Agendamento, AgendamentoService } from '../../service/agendamento.service';
+import { ProntuarioService } from '../../service/prontuario.sevice';
+import { Router } from '@angular/router';
 
-Chart.register(...registerables, SankeyController, Flow);
+// Interface auxiliar para tipar o objeto de data enviado pelo template do PrimeNG
+interface PrimeNgDate {
+  day: number;
+  month: number;
+  year: number;
+}
 
 @Component({
-    templateUrl: './painel.component.html',
+  selector: 'app-painel',
+  templateUrl: './painel.component.html',
+  styleUrl: './painel.component.scss'
 })
-export class PainelComponent implements OnInit, OnDestroy { // Implementando OnDestroy
+export class PainelComponent implements OnInit {
 
-    chartData: any;
-    chartOptions: any;
-    chartData2: any;
-    chartOptions2: any;
+  totalPacientesCadastrados = 0;
+  consultasMes = 0;
+  consultasConfirmadas = 0;
+  consultasCanceladas = 0;
 
-    // Propriedades removidas: teste, listaAnos, items, products (Não utilizadas)
-    detalheRelatorio: boolean = false;
-    // movimentacaoFinais: any[]; // Removida, pois a tabela usa tabelaMovimentacaoFinal
+  loading = false;
+  dataAtual = new Date();
+  listaAgendamentos: Agendamento[] = [];
+  
+  // Dicionário para busca rápida de agendamentos por data O(1)
+  private agendamentosPorDataMap = new Map<string, Agendamento[]>();
 
-    competenciaSelecionado!: ICompetencia; // Usando '!' para inicialização no ngOnInit
-    
-    saldo: any[] = []; // Inicializado como array vazio para consistência
+  constructor(
+    private agendamentoService: AgendamentoService,
+    private prontuarioService: ProntuarioService,
+    private router: Router
+  ) { }
 
-    // items!: MenuItem[]; // Removida
+  ngOnInit(): void {
+    this.carregarDadosPainel();
+  }
 
-    // products!: any[]; // Removida
-
-    chartCreditos: any; // Tipagem ajustada
-    chartDataCrescimento: any; // Tipagem ajustada
-
-    chartOptionsStrack: any;
-   
-    subscription!: Subscription;
-    tabelaBancoFinal: any[] = [];
-    tabelaBancoFinalReal: any[] = [];
-    tabelaMovimentacaoFinal: any[] = [];
-    relatorioDetalhe: IMovimentacao[] = [];
-
-    listaIncosistencia: any[] = [];
-
-    constructor(public layoutService: LayoutService, private relatorioService: RelatorioService, private movimentaocaoService: MovimentacaoService) {
-        this.subscription = this.layoutService.configUpdate$
-        .pipe(debounceTime(25))
-        .subscribe((config) => {
-            this.initChart();
-        });
+  irParaProntuario(prontuarioId: number | undefined): void {
+    if (prontuarioId) {
+      this.router.navigate(['/pages/prontuario', prontuarioId]);
+    } else {
+      console.warn('Este agendamento não possui um prontuário vinculado.');
     }
+  }
 
-    ngOnInit() {
-        // Inicializa a competência com o ano atual e o mês atual (corrigido para 1-12)
-        const dataAtual = new Date();
-        this.competenciaSelecionado = {
-            nrAno: dataAtual.getFullYear(),
-            nrMes: dataAtual.getMonth() + 1, // Mês é 0-indexado, adicionando 1
-        };
+  carregarDadosPainel(): void {
+    this.loading = true;
 
-        this.initChart();
-
-        // this.items = [ // Removido por não ser utilizado
-        //     { label: 'Add New', icon: 'pi pi-fw pi-plus' },
-        //     { label: 'Remove', icon: 'pi pi-fw pi-minus' }
-        // ];
-
-       // this.mostrarRelatorioFinal(); // Comentário mantido
-        this.mostrarIncosistencia();
-    }
-
-    ngOnDestroy() {
-        if (this.subscription) {
-            this.subscription.unsubscribe();
-        }
-    }
-
-    onDetalheMovimentacao(icRelatorio: string, mes: number) {
-        this.detalheRelatorio = true;
-        this.movimentaocaoService.listarDetalheMovimentacaoRelatorio(icRelatorio, mes, this.competenciaSelecionado.nrAno).subscribe(
-            data => this.relatorioDetalhe = data,
-            err => console.error('Erro ao listar detalhes da movimentação:', err) // Tratamento de erro padronizado
-        );
-    }
-
-    private valorAnterior: number = 0;
-    getComparar(valorAtual: number): string[] {
-        if (this.valorAnterior < valorAtual) {
-            this.valorAnterior = valorAtual;            
-            return ["pi-angle-double-up", "blue"];
-        } else {
-            this.valorAnterior = valorAtual;
-            return ["pi-angle-double-down", "red"];
-        }
-    }
-
-    mostrarIncosistencia(): void {
-        this.relatorioService.listarIncosistencia().subscribe(
-            data => {
-                this.listaIncosistencia = data
-            },
-            err => console.error('Erro ao listar inconsistências:', err) // Tratamento de erro padronizado
-        )
-
-        // Chamada duplicada removida: this.relatorioService.listarPainelValores(this.competenciaSelecionado.nrAno).subscribe(...)
+    // Executa as requisições em paralelo de forma limpa e segura
+    forkJoin({
+      prontuarios: this.prontuarioService.getProntuarios(),
+      agendamentos: this.agendamentoService.getAgendamentos()
+    }).subscribe({
+      next: ({ prontuarios, agendamentos }) => {
+        this.totalPacientesCadastrados = prontuarios.length;
         
-        this.relatorioService.listarPainelValores(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                // console.log(this.saldo); // console.log removido
-                this.saldo = data;
-            },
-            err => console.error('Erro ao listar painel de valores:', err) // Tratamento de erro padronizado
-        )
+        this.listaAgendamentos = agendamentos.map(item => ({
+          ...item,
+          dataHoraInicio: new Date(item.dataHoraInicio as string)
+        }));
 
-        this.relatorioService.listarPainelMovimentacaoFinal(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.tabelaMovimentacaoFinal = data;
-            },
-            err => console.error('Erro ao listar movimentação final:', err) // Tratamento de erro padronizado
-        )
-
-        this.relatorioService.graficoCredtioDebito(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.chartCreditos = data;
-            },
-            err => console.error('Erro ao carregar gráfico de crédito/débito:', err) // Tratamento de erro padronizado
-        )
-
-        this.relatorioService.graficoRelatorioCredito(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.chartData = data;
-            },
-            err => console.error('Erro ao carregar gráfico de relatório de crédito:', err) // Tratamento de erro padronizado
-        )
-
-        this.relatorioService.graficoCrescimento(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.chartDataCrescimento = data;
-            },
-            err => console.error('Erro ao carregar gráfico de crescimento:', err) // Tratamento de erro padronizado
-        )
-
-        this.relatorioService.tabelaRelatorioBancoFinalReal(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.tabelaBancoFinalReal = data;
-                // console.log(this.tabelaBancoFinal); // console.log removido
-            },
-            err => console.error('Erro ao carregar tabela de saldo final real:', err) // Tratamento de erro padronizado
-        )
-
-        this.relatorioService.tabelaRelatorioBancoFinal(this.competenciaSelecionado.nrAno).subscribe(
-            data => {
-                this.tabelaBancoFinal = data;
-            },
-            err => console.error('Erro ao carregar tabela de saldo final:', err) // Tratamento de erro padronizado
-        )
-
-        // Chamada para atualizar o Gráfico Sankey
-        this.iniciarGrafico();
-    }
-
-    // Código Sankey (iniciarGrafico) mantido intacto
-    iniciarGrafico(){
-       
-       this.relatorioService.listarGraficoSankey(this.competenciaSelecionado).subscribe(
-            suc => {
-                this.chartData2 = {
-      datasets: [
-        {
-          label: 'Movimentação do Dinheiro',
-          data: suc, // seus dados no formato Sankey
-          colorFrom: 'rgba(0, 123, 255, 0.8)',   // azul vibrante
-          colorTo: 'rgba(0, 200, 100, 0.8)',     // verde mais claro
-          colorMode: 'gradient',
-          borderWidth: 2,
-        },
-      ],
-    };
-    
-    this.chartOptions2 = {
-      sankey: {
-        node: {
-          width: 40,         // largura de cada nó
-          padding: 25,       // espaço vertical entre nós
-          label: {
-            font: {
-              size: 16,      // tamanho da fonte dos rótulos
-              weight: 'bold'
-            },
-            color: '#111'    // cor dos textos nos nós
-          }
-        },
-        link: {
-          colorMode: 'gradient',
-          borderColor: '#ccc',
-          borderWidth: 1,
-          transparency: 0.4  // deixa os fluxos semi-transparentes
-        }
+        this.inicializarMapeamentoEAtendimentos();
+        this.loading = false;
       },
-      plugins: {
-        legend: {
-          labels: {
-            font: {
-              size: 16
-            },
-            color: '#333'
-          }
-        },
-        tooltip: {
-          bodyFont: {
-            size: 14
-          }
-        }
-      },
-      layout: {
-        padding: 40
+      error: (err) => {
+        console.error('Erro ao processar dados do painel:', err);
+        this.loading = false;
       }
-    };
-            },
-            err => console.log("erro")
-        );
-    
-        /*
-        this.chartData2 = {
-          datasets: [
-            {
-              label: 'Movimentação do Dinheiro',
-              data: [
-                { from: 'Credito', to: 'Corrente', flow: 100 },
-                { from: 'Salario', to: 'Corrente', flow: 100 },
-                { from: 'Adiantamento', to: 'Corrente', flow: 50 },
-                { from: 'Resgate', to: 'Corrente', flow: 50 },
-                { from: 'Corrente', to: 'aplicação', flow: 100 },
-                { from: 'Corrente', to: 'Cartão de credito', flow: 100 },
-                { from: 'Corrente', to: 'Outros', flow: 100 },
-                
-              ],
-              colorFrom: 'blue',
-              colorTo: 'red',
-              colorMode: 'gradient',
-            },
-          ],
-        };*/
-    
-    this.chartOptions2 = {
-      plugins: {
-        title: {
-          display: true,
-          text: 'UK Power Generation (2023)',
-        },
-        tooltip: {
-          callbacks: {
-            label: function (context) {
-              // Mostra o fluxo com label
-              const d = context.raw as any;
-              return `${d.from} → ${d.to}: ${d.flow} GWh`;
-            },
-          },
-        },
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-    };
+    });
+  }
+
+  private inicializarMapeamentoEAtendimentos(): void {
+    this.agendamentosPorDataMap.clear();
+
+    this.listaAgendamentos.forEach(agenda => {
+      const data = agenda.dataHoraInicio as Date;
+      const chaveStr = this.gerarChaveData(data.getFullYear(), data.getMonth(), data.getDate());
       
-    }
+      if (!this.agendamentosPorDataMap.has(chaveStr)) {
+        this.agendamentosPorDataMap.set(chaveStr, []);
+      }
+      this.agendamentosPorDataMap.get(chaveStr)?.push(agenda);
+    });
 
-    initChart() {
-        const documentStyle = getComputedStyle(document.documentElement);
-        const textColor = documentStyle.getPropertyValue('--text-color');
-        const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-        const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+    this.calcularKpis();
+  }
 
-        // console.log("estou vendo a char", documentStyle.getPropertyValue('--bluegray-700')); // console.log removido
-        this.iniciarGrafico();
-        
-        // Dados estáticos removidos, pois chartData é populado pela API
-        // this.chartData = { ... };
+  obterPacientesDoDia(date: PrimeNgDate): Agendamento[] {
+    const chave = this.gerarChaveData(date.year, date.month, date.day);
+    return this.agendamentosPorDataMap.get(chave) || [];
+  }
 
-        // Inicialização de chartOptions (opções para gráficos de linha/barra não empilhados)
-        this.chartOptions = {
-            maintainAspectRatio: false,
-            aspectRatio: 0.8,
-            plugins: {
-                legend: {
-                    labels: {
-                        color: textColor
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder
-                    }
-                },
-                y: {
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder
-                    }
-                }
-            }
-        };
+  verificarSePossuiAgendamentoNoDia(date: PrimeNgDate): boolean {
+    const pacientes = this.obterPacientesDoDia(date);
+    return pacientes.some(a => a.status !== 'Cancelado');
+  }
 
-        this.chartOptionsStrack = {
-            maintainAspectRatio: false,
-            aspectRatio: 0.8,
-            plugins: {
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                },
-                legend: {
-                    labels: {
-                        color: textColor
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    stacked: true,
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder,
-                        drawBorder: false
-                    }
-                },
-                y: {
-                    stacked: true,
-                    ticks: {
-                        color: textColorSecondary
-                    },
-                    grid: {
-                        color: surfaceBorder,
-                        drawBorder: false
-                    }
-                }
-            }
-        };
-    }
+  verificarSePossuiCancelamentoNoDia(date: PrimeNgDate): boolean {
+    const pacientes = this.obterPacientesDoDia(date);
+    return pacientes.some(a => a.status === 'Cancelado');
+  }
 
-    // Método vazio removido: pesquisarMovimentacaoFinal()
+  obterDicaTooltipPacientes(date: PrimeNgDate): string {
+    const pacientesDoDia = this.obterPacientesDoDia(date);
+    if (!pacientesDoDia.length) return 'Nenhum paciente marcado';
+
+    return 'Pacientes:\n' + pacientesDoDia.map(p => `- ${p.nomePaciente} (${p.status})`).join('\n');
+  }
+
+  private calcularKpis(): void {
+    const mesAtual = this.dataAtual.getMonth();
+    const anoAtual = this.dataAtual.getFullYear();
+
+    const agendamentosDoMes = this.listaAgendamentos.filter(a => {
+      const data = a.dataHoraInicio as Date;
+      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    });
+
+    this.consultasMes = agendamentosDoMes.length;
+    this.consultasConfirmadas = agendamentosDoMes.filter(a => a.status === 'Confirmado' || a.status === 'Finalizado').length;
+    this.consultasCanceladas = agendamentosDoMes.filter(a => a.status === 'Cancelado').length;
+  }
+
+  // Método centralizador de chaves para evitar divergências de fuso horário
+  private gerarChaveData(ano: number, mes: number, dia: number): string {
+    return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+  }
 }

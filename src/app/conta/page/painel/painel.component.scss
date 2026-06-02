@@ -1,0 +1,22 @@
+::v-deep .calendar-agenda-estilo {
+  .p-datepicker-calendar {
+    // Altera as células de círculos para blocos que ocupam 100% do espaço da grade
+    td {
+      padding: 2px !important;
+      
+      > span {
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+      }
+    }
+    
+    // Remove cabeçalhos de dias rígidos
+    th {
+      padding: 0.5rem 0 !important;
+      font-size: 0.85rem;
+    }
+  }
+}

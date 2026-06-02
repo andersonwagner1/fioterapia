@@ -21,54 +21,25 @@ export class AppMenuComponent implements OnInit {
                 ]
             },
                 {
-                    label: 'Cadastro',
+                    label: 'Prontuario',
                     items: [
                         {
-                            label: "Calendário",
-                            items:[
-                                {label: 'Competencia', icon: 'pi pi-fw pi-calendar', routerLink: ['/pages/competencia']},
-                            ]
+                            label: "Pesquisar Prontuario", routerLink: ['/pages/lista-prontuario'], icon: 'pi pi-fw pi-search'  
+                           
+                        },
+
+                        {
+                            label: "Novo Prontuario", routerLink: ['/pages/prontuario'], icon: 'pi pi-fw pi-plus'  
+                           
                         },
                         {
-                            label: "Local",
-                            items: [
-                                {label: 'Banco', icon: 'pi pi-fw pi-building', routerLink: ['pages/banco']},
-                                {label: 'Conta', icon: 'pi pi-fw pi-book', routerLink: ['/pages/conta']},
-    
-                            ]
+                            label: "Agenda", routerLink: ['/pages/agendamentos'], icon: 'pi pi-fw pi-calendar'
                         },
-                        {
-                            label: "Tipo",
-                            items: [
-                                {label: 'Categoria', icon: 'pi pi-fw pi-folder', routerLink: ['/pages/categoria']},
-                                {label: 'Tipo de Movimentação', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/pages/tipo-movimentacao']},
-                                {label: 'Transferência', icon: 'pi pi-fw pi-arrows-h', routerLink: ['/pages/transferencia']},
-                            ],
-                        },
-                    ]
-                },
-    
-                {
-                    label: 'Movimentação',
-                    items: [
-                        { label: 'Movimentação', icon: 'pi pi-fw pi-wallet', routerLink: ['/pages/movimentacao'] },
-                        { label: 'Cartão de Crédito', icon: 'pi pi-fw pi-credit-card', routerLink: ['/pages/cartao-credito'] },
-                    ]
-                },
                 
-                {
-                    label: 'Investimento',
-                    items: [
-                        {label: 'Tipo de Investimento', icon: "pi pi-fw pi-money-bill", routerLink:['/pages/investimento']}
-                    ]
-                },
-                {
-                    label: 'Validação',
-                    items: [
-                        {label: 'Validação Fechamento', icon: "pi pi-fw pi-money-bill", routerLink:['/pages/validacaoFinal']},
-                        {label: 'Importar', icon: "pi pi-fw pi-money-bill", routerLink:['/pages/importar']}
-                    ]
-                },
+                    ]  
+                }, 
+    
+                
         ];
     }
 }

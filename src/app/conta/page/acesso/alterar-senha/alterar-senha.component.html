@@ -1,0 +1,84 @@
+<div class="p-4 bg-gray-100 min-h-screen flex justify-content-center align-items-start">
+  <div class="card p-4 border-round shadow-1 bg-white w-full md:w-28rem mt-5">
+    
+    <!-- Cabeçalho Visual -->
+    <div class="text-center mb-4 pb-3 border-bottom-1 surface-border">
+      <div class="inline-flex align-items-center justify-content-center bg-blue-50 border-round mb-3" style="width: 3.5rem; height: 3.5rem">
+        <i class="pi pi-key text-primary text-2xl"></i>
+      </div>
+      <h2 class="m-0 text-gray-800 text-xl font-bold">Segurança da Conta</h2>
+      <p class="text-xs text-600 mt-1">Atualize sua senha periodicamente para manter seus dados clínicos protegidos.</p>
+    </div>
+
+    <!-- Formulário Inputs -->
+    <div class="p-fluid">
+      
+      <!-- Senha Atual -->
+      <div class="field mb-3">
+        <label for="senhaAtual" class="font-semibold text-xs text-700 block mb-1">Senha Atual</label>
+        <p-password 
+          id="senhaAtual" 
+          [(ngModel)]="dadosSenha.senhaAtual" 
+          [toggleMask]="true" 
+          [feedback]="false" 
+          placeholder="Digite sua senha de hoje">
+        </p-password>
+      </div>
+
+      <!-- Nova Senha com Medidor de Força -->
+      <div class="field mb-3">
+        <label for="novaSenha" class="font-semibold text-xs text-700 block mb-1">Nova Senha</label>
+        <p-password 
+          id="novaSenha" 
+          [(ngModel)]="dadosSenha.novaSenha" 
+          [toggleMask]="true" 
+          promptLabel="Digite uma senha segura"
+          weakLabel="Fraca" 
+          mediumLabel="Média" 
+          strongLabel="Forte"
+          placeholder="Mínimo 6 caracteres">
+        </p-password>
+      </div>
+
+      <!-- Confirmar Nova Senha -->
+      <div class="field mb-4">
+        <label for="confirmarSenha" class="font-semibold text-xs text-700 block mb-1">Confirme a Nova Senha</label>
+        <p-password 
+          id="confirmarSenha" 
+          [(ngModel)]="dadosSenha.confirmarNovaSenha" 
+          [toggleMask]="true" 
+          [feedback]="false" 
+          placeholder="Repita a nova senha">
+        </p-password>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="flex gap-2 justify-content-end border-top-1 surface-border pt-3">
+        <button 
+          pButton 
+          pRipple 
+          label="Voltar" 
+          class="p-button-text p-button-secondary w-auto px-4" 
+          routerLink="/pages/painel">
+        </button>
+        
+        <!-- Desabilita o botão se qualquer campo estiver em branco -->
+        <button 
+          pButton 
+          pRipple 
+          label="Atualizar Senha" 
+          icon="pi pi-lock-open" 
+          class="p-button-primary w-auto px-4 font-semibold" 
+          [loading]="loading"
+          [disabled]="!dadosSenha.senhaAtual || !dadosSenha.novaSenha || !dadosSenha.confirmarNovaSenha"
+          (click)="solicitarAlteracao()">
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Container obrigatório do PrimeNG para disparar as janelas ConfirmDialog -->
+<p-confirmDialog [style]="{width: '400px'}"></p-confirmDialog>

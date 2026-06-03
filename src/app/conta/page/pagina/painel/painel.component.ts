@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { Agendamento, AgendamentoService } from '../../service/agendamento.service';
-import { ProntuarioService } from '../../service/prontuario.sevice';
+import { Agendamento, AgendamentoService } from '../../../service/agendamento.service';
+import { ProntuarioService } from '../../../service/prontuario.sevice';
 import { Router } from '@angular/router';
 
 // Interface auxiliar para tipar o objeto de data enviado pelo template do PrimeNG

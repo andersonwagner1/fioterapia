@@ -2,9 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { MensagemAvisoService } from 'src/app/util/mensagemAviso/mensagem-aviso.service';
-import { EvolucaoClinica, MarcoMotor, Prontuario } from '../../model/iprontuario.compoent';
+
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProntuarioService } from '../../service/prontuario.sevice';
+import { EvolucaoClinica, MarcoMotor, Prontuario } from 'src/app/conta/model/iprontuario.compoent';
+import { ProntuarioService } from 'src/app/conta/service/prontuario.sevice';
+
 
 
 @Component({
@@ -153,6 +155,18 @@ export class ProntuarioFormComponent implements OnInit {
     // Inicialização segura das listas de controle de marcações
     this.garantirInicializacaoArraysMarcos();
   }
+
+
+  onNovaEvolucao(): void {
+  this.exibindoFormEvolucao = true;
+  this.novaEvolucao = {
+    dataConsulta: new Date(),
+    fisioterapeuta: this.profissionalLogado,
+    comoChegou: '',
+    procedimento: '',
+    comoSaiu: ''
+  };
+}
 
   limparFormularioNovo(): void {
     this.registro = {

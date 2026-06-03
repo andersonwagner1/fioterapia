@@ -1,0 +1,101 @@
+<div class="p-4 bg-gray-100 min-h-screen flex justify-content-center align-items-start">
+  <div class="card p-4 border-round shadow-1 bg-white w-full md:w-38rem mt-2">
+    
+    <div class="flex align-items-center gap-3 mb-4 border-bottom-1 surface-border pb-3">
+      <button pButton pRipple icon="pi pi-arrow-left" class="p-button-rounded p-button-text p-button-secondary" routerLink="/pages/config" pTooltip="Voltar para a Matriz de Telas"></button>
+      <div>
+        <h2 class="m-0 text-gray-800 text-xl font-bold">Inclusão de Profissional</h2>
+        <p class="text-xs text-600 m-0">Preencha os dados cadastrais e defina o papel de atuação na clínica.</p>
+      </div>
+    </div>
+
+    <div *ngIf="!oPodeIncluir()" class="p-3 bg-orange-50 border-round border-left-3 border-orange-500 text-orange-700 text-sm mb-4">
+      <i class="pi pi-exclamation-triangle mr-2"></i>
+      <strong>Acesso Restrito:</strong> Seu usuário possui permissão apenas de consulta para este módulo. A gravação está indisponível.
+    </div>
+
+    <div class="p-fluid">
+      
+      <h3 class="text-sm font-bold text-primary uppercase tracking-wider mb-3 mt-0">1. Identificação Geral</h3>
+      
+      <div class="field mb-3">
+        <label class="font-semibold text-xs text-700 block mb-1">Nome Completo</label>
+        <span class="p-input-icon-left">
+          <i class="pi pi-user"></i>
+          <input type="text" pInputText [(ngModel)]="novoUsuario.nome" placeholder="Ex: Dra. Viviane de Castro Lima" [disabled]="!oPodeIncluir()" />
+        </span>
+      </div>
+
+      <div class="grid p-0 m-0">
+        <div class="col-12 md:col-6 field pl-0 py-0 mb-3 pr-0 md:pr-2">
+          <label class="font-semibold text-xs text-700 block mb-1">CPF (Obrigatório)</label>
+          <p-inputMask mask="999.999.999-99" [(ngModel)]="novoUsuario.cpf" placeholder="000.000.000-00" [disabled]="!oPodeIncluir()"></p-inputMask>
+        </div>
+        
+        <div class="col-12 md:col-6 field pr-0 py-0 mb-3 pl-0 md:pl-2">
+          <label class="font-semibold text-xs text-700 block mb-1">WhatsApp / Telefone</label>
+          <p-inputMask mask="(99) 99999-9999" [(ngModel)]="novoUsuario.telefone" placeholder="(11) 99999-9999" [disabled]="!oPodeIncluir()"></p-inputMask>
+        </div>
+      </div>
+
+      <div class="field mb-4">
+        <label class="font-semibold text-xs text-700 block mb-1">E-mail Corporativo (Login do Sistema)</label>
+        <span class="p-input-icon-left">
+          <i class="pi pi-envelope"></i>
+          <input type="email" pInputText [(ngModel)]="novoUsuario.email" placeholder="nome.sobrenome@clinikids.com" [disabled]="!oPodeIncluir()" />
+        </span>
+      </div>
+
+      <h3 class="text-sm font-bold text-primary uppercase tracking-wider mb-3 border-top-1 surface-border pt-3">2. Atribuição de Cargo</h3>
+      
+      <div class="field mb-4">
+        <label class="font-semibold text-xs text-700 block mb-1">Selecione a Função do Colaborador</label>
+        <p-dropdown [options]="opcoesFuncoes" [(ngModel)]="novoUsuario.funcao" optionLabel="label" optionValue="value" [disabled]="!oPodeIncluir()"></p-dropdown>
+      </div>
+
+      <div *ngIf="novoUsuario.funcao === 'FISIOTERAPEUTA'" class="bg-blue-50 p-3 border-round border-1 border-blue-100 mb-4 animation-duration-200">
+        <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-3 mt-0"><i class="pi pi-id-card mr-2"></i>3. Registro de Classe Profissional</h3>
+        
+        <div class="grid p-0 m-0">
+          <div class="col-12 md:col-8 field pl-0 py-0 mb-3 pr-0 md:pr-2">
+            <label class="font-semibold text-xs text-blue-900 block mb-1">Número do CREFITO</label>
+            <input type="text" pInputText [(ngModel)]="novoUsuario.crefitoNumero" placeholder="Ex: 123456-F" />
+          </div>
+          
+          <div class="col-12 md:col-4 field pr-0 py-0 mb-3 pl-0 md:pl-2">
+            <label class="font-semibold text-xs text-blue-900 block mb-1">UF Conselho</label>
+            <p-dropdown [options]="estadosUf" [(ngModel)]="novoUsuario.crefitoUf" optionLabel="label" optionValue="value"></p-dropdown>
+          </div>
+        </div>
+
+        <div class="field mb-1">
+          <label class="font-semibold text-xs text-blue-900 block mb-1">Tempo Padrão da Sessão de Fisioterapia</label>
+          <div class="p-inputgroup">
+            <input type="number" pInputText [(ngModel)]="novoUsuario.tempoSessaoMinutos" placeholder="50" min="15" max="180" />
+            <span class="p-inputgroup-addon">minutos</span>
+          </div>
+          <small class="text-500 block mt-1">Este valor guiará a montagem automática do grid de horários na agenda do profissional.</small>
+        </div>
+      </div>
+
+      <div class="flex gap-2 justify-content-end border-top-1 surface-border pt-3 mt-2">
+        <button pButton pRipple label="Cancelar" class="p-button-text p-button-secondary w-auto px-4" routerLink="/pages/config"></button>
+        
+        <button 
+          pButton 
+          pRipple 
+          label="Gravar e Gerar Acessos" 
+          icon="pi pi-check" 
+          class="p-button-primary w-auto px-4 font-semibold" 
+          [loading]="loading"
+          [disabled]="!oPodeIncluir() || !novoUsuario.nome || !novoUsuario.email || !novoUsuario.cpf || (novoUsuario.funcao === 'FISIOTERAPEUTA' && !novoUsuario.crefitoNumero)"
+          (click)="confirmarSalvamento()">
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

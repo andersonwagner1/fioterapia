@@ -11,7 +11,7 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { DashboardsRoutingModule } from './painel-routing.module';
 import { PainelComponent } from './painel.component';
 import { MessagesModule } from 'primeng/messages';
-import { MoedaPipe } from "../../../util/pipes/moeda.pipe";
+import { MoedaPipe } from "../../../../util/pipes/moeda.pipe";
 import { PorcentagemPipe } from 'src/app/util/pipes/porcentagem';
 
 

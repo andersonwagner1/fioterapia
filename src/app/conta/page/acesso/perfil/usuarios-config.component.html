@@ -1,0 +1,126 @@
+<div class="p-4 bg-gray-100 min-h-screen">
+  <div class="card p-4 border-round shadow-1 bg-white">
+    
+    <!-- Cabeçalho -->
+    <div class="mb-4">
+      <h2 class="m-0 text-gray-800"><i class="pi pi-shield mr-2 text-primary text-2xl"></i>Segurança: Matriz de Rotas e Telas</h2>
+      <p class="text-600 mt-1">Veja todas as telas ativas no sistema e gerencie quais usuários possuem privilégios de acesso.</p>
+    </div>
+
+    <!-- TABELA DE TELAS DISPONÍVEIS -->
+    <p-table [value]="telas" responsiveLayout="scroll" class="p-datatable-striped shadow-1">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Módulo</th>
+          <th>Nome da Tela</th>
+          <th>Rota Ativa (URL)</th>
+          <th style="width: 12rem" class="text-center">Acessos</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-tela>
+        <tr>
+          <td>
+            <span class="px-2 py-1 text-xs font-bold border-round bg-gray-200 text-gray-700">{{ tela.modulo }}</span>
+          </td>
+          <td><strong>{{ tela.nome }}</strong></td>
+          <td><code class="text-pink-600 font-mono text-sm">{{ tela.rota }}</code></td>
+          <td class="text-center">
+            <!-- Botão para abrir o gerenciador de usuários daquela tela -->
+            <button 
+              pButton 
+              pRipple 
+              label="Ver Usuários" 
+              icon="pi pi-users" 
+              class="p-button-outlined p-button-sm p-button-info"
+              (click)="gerenciarUsuariosDaTela(tela)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </div>
+</div>
+
+<!-- MODAL: LISTA DE USUÁRIOS COMPATÍVEIS COM A TELA SELECIONADA -->
+<p-dialog 
+  [header]="'Permissões na Tela: ' + (telaSelecionada?.nome)" 
+  [(visible)]="exibirModalUsuarios" 
+  [modal]="true" 
+  [style]="{width: '750px'}" 
+  styleClass="p-fluid">
+  
+  <div class="mt-2">
+    <p-table [value]="listaUsuariosPermissao" responsiveLayout="scroll" class="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nome do Usuário</th>
+          <th style="width: 7.5rem" class="text-center">Visualizar</th>
+          <th style="width: 7.5rem" class="text-center">Incluir</th>
+          <th style="width: 7.5rem" class="text-center">Alterar</th>
+          <th style="width: 6rem" class="text-center">Ação</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-permissao>
+        <tr>
+          <!-- Nome e Cargo -->
+          <td>
+            <div class="font-semibold text-gray-800">{{ permissao.nomeUsuario }}</div>
+            <div style="font-size: 10px;" class="text-500 font-bold">{{ permissao.funcao }}</div>
+          </td>
+          
+          <!-- Dropdown Visualizar (Sim/Não) -->
+          <td class="text-center">
+            <p-dropdown 
+              [options]="opcoesSimNao" 
+              [(ngModel)]="permissao.visualizar" 
+              optionLabel="label" 
+              optionValue="value"
+              styleClass="p-inputtext-sm">
+            </p-dropdown>
+          </td>
+          
+          <!-- Dropdown Incluir (Sim/Não) -->
+          <td class="text-center">
+            <p-dropdown 
+              [options]="opcoesSimNao" 
+              [(ngModel)]="permissao.incluir" 
+              optionLabel="label" 
+              optionValue="value"
+              styleClass="p-inputtext-sm">
+            </p-dropdown>
+          </td>
+          
+          <!-- Dropdown Alterar (Sim/Não) -->
+          <td class="text-center">
+            <p-dropdown 
+              [options]="opcoesSimNao" 
+              [(ngModel)]="permissao.alterar" 
+              optionLabel="label" 
+              optionValue="value"
+              styleClass="p-inputtext-sm">
+            </p-dropdown>
+          </td>
+
+          <!-- Botão de Salvar da Linha -->
+          <td class="text-center">
+            <button 
+              pButton 
+              pRipple 
+              icon="pi pi-save" 
+              class="p-button-rounded p-button-success p-button-sm"
+              pTooltip="Salvar Permissão"
+              tooltipPosition="left"
+              (click)="salvarAlteracaoUsuario(permissao)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Fechar" icon="pi pi-times" class="p-button-text p-button-secondary w-auto px-4" (click)="exibirModalUsuarios = false"></button>
+  </ng-template>
+</p-dialog>

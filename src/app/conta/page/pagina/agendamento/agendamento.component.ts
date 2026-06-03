@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { Agendamento, AgendamentoService } from '../../service/agendamento.service';
-import { Prontuario } from '../../model/iprontuario.compoent';
-import { ProntuarioService } from '../../service/prontuario.sevice';
+import { Agendamento, AgendamentoService } from '../../../service/agendamento.service';
+import { Prontuario } from '../../../model/iprontuario.compoent';
+import { ProntuarioService } from '../../../service/prontuario.sevice';
+import { BasePermissaoComponent } from '../../base-permissao.component';
 
 
 @Component({
@@ -11,9 +12,8 @@ import { ProntuarioService } from '../../service/prontuario.sevice';
   styleUrl: './agendamento.component.scss',
   providers: [MessageService]
 })
-export class AgendamentoComponent implements OnInit {
-
-  listaAgendamentos: Agendamento[] = [];
+export class AgendamentoComponent extends BasePermissaoComponent implements OnInit {
+  protected override telaId = 'agenda' as const;  listaAgendamentos: Agendamento[] = [];
   listaPacientes: Prontuario[] = [];
   
   agendaDialog = false;
@@ -36,10 +36,13 @@ export class AgendamentoComponent implements OnInit {
   ];
 
   constructor(
+   
     private agendamentoService: AgendamentoService,
     private prontuarioService: ProntuarioService,
     private messageService: MessageService
-  ) { }
+  ) {
+    super();
+  }
 
 
 
@@ -49,9 +52,12 @@ listaAgendamentosFiltrados: Agendamento[] = [];
 
 // ... Mantenha o construtor e as definições de dropdowns idênticas ...
 
-ngOnInit(): void {
-  this.carregarDados();
-}
+override ngOnInit(): void {
+    super.ngOnInit(); // Roda a validação de tela automática da classe Pai
+    
+    // Se o usuário passar da validação, o código daqui para baixo roda normalmente:
+    this.carregarDados();
+  }
 
 
 // LÓGICA DE FILTRAGEM DE DATA (Desconsiderando a hora no cruzamento)
@@ -103,6 +109,8 @@ onLimparFiltroData(): void {
 
 
   carregarDados(): void {
+
+
     this.loading = true;
     
     // Carrega os agendamentos e a lista de pacientes simultaneamente
@@ -127,6 +135,9 @@ onLimparFiltroData(): void {
   }
 
   onNovoAgendamento(): void {
+
+    if (!this.oPodeIncluir()) return;
+
     this.agendamento = {
       prontuarioId: null,
       nomePaciente: '',
@@ -154,6 +165,9 @@ onLimparFiltroData(): void {
   }
 
   onSalvarAgendamento(): void {
+
+    if (!this.oPodeIncluir()) return;
+
     if (!this.agendamento.prontuarioId || !this.agendamento.dataHoraInicio) {
       this.messageService.add({ severity: 'warn', summary: 'Atenção', detail: 'Preencha os campos obrigatórios.' });
       return;

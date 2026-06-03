@@ -3,13 +3,14 @@ import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AppLayoutModule } from './layout/app.layout.module';
-
+import { ConfirmationService } from 'primeng/api';
 
 @NgModule({
     declarations: [AppComponent],
     imports: [AppRoutingModule, AppLayoutModule],
     providers: [
         { provide: LocationStrategy, useClass: PathLocationStrategy },
+        ConfirmationService
        
 
     ],

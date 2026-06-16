@@ -2,6 +2,8 @@
 // INTERFACES DE MAPEAMENTO DE DADOS
 // ==========================================
 
+import { IUsuario } from "./iusuario.component";
+
 export interface MarcoMotor {
   valor: number;
   descricao: string;
@@ -11,9 +13,9 @@ export interface MarcoMotor {
 
 export interface EvolucaoClinica {
   id?: number;
-  prontuarioId?: number;
+  prontuario?: Prontuario;
   dataConsulta?: Date | null;
-  fisioterapeuta?: string;
+  fisioterapeuta?: IUsuario;
   comoChegou?: string;
   procedimento?: string;
   comoSaiu?: string;

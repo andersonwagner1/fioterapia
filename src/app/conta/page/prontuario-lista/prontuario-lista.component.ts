@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ProntuarioService } from '../../service/prontuario.sevice';
-import { Prontuario } from '../../model/iprontuario.compoent';
-import { ProntuarioFormComponent } from '../pagina/prontuario/prontuarioForm.component';
-import { Router, Routes } from '@angular/router';
+import { Prontuario } from '../../model/iprontuario.component';
+
+import { Router} from '@angular/router';
 
 
 @Component({

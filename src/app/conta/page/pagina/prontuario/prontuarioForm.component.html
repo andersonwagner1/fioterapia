@@ -661,90 +661,230 @@
 
 
 <p-tabPanel header="Histórico do Paciente">
-  
-  <div class="flex justify-content-between align-items-center mb-3 mt-2">
-    <h6 class="m-0 font-bold text-900">Histórico de Atendimentos Realizados</h6>
-    <button 
-      *ngIf="!exibindoFormEvolucao"
-      pButton pRipple 
-      label="Nova Evolução / Sessão" 
-      icon="pi pi-plus" 
-      class="p-button-sm p-button-primary"
-      (click)="onNovaEvolucao()"
-    ></button>
-  </div>
 
-  <div *ngIf="exibindoFormEvolucao" class="surface-card border-1 surface-border border-round p-4 mb-4 bg-yellow-50 shadow-1 animate-fadein">
-    <div class="flex justify-content-between align-items-center mb-3 pb-2 border-bottom-1 surface-border">
-      <span class="font-bold text-primary"><i class="pi pi-plus-circle mr-2"></i>Registrar Nova Sessão</span>
-      <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-secondary" (click)="exibindoFormEvolucao = false"></button>
+    <!-- Cabeçalho -->
+    <div class="flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="m-0">Histórico de Atendimentos</h5>
+            <small class="text-500">
+                Total de evoluções:
+                <strong>{{ registro.historicoEvolucoes?.length || 0 }}</strong>
+            </small>
+        </div>
+
+        <button
+            *ngIf="!exibindoFormEvolucao"
+            pButton
+            pRipple
+            icon="pi pi-plus"
+            label="Nova Evolução"
+            class="p-button-success"
+            (click)="onNovaEvolucao()">
+        </button>
     </div>
 
-    <div class="grid align-items-center mb-3">
-      <div class="field col-12 md:col-4 mb-0">
-        <label class="font-bold">Data da Consulta</label>
-        <p-calendar [(ngModel)]="novaEvolucao.dataConsulta" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
-      </div>
-      <div class="field col-12 md:col-8 mb-0">
-        <label class="font-bold block mb-1">Fisioterapeuta</label>
-        <div class="text-900 font-medium p-2 border-round surface-200 bg-white border-1 surface-border">{{ profissionalLogado }}</div>
-      </div>
-    </div>
+    <!-- Formulário -->
+    <p-card
+        *ngIf="exibindoFormEvolucao"
+        styleClass="mb-4 shadow-2">
 
-    <div class="field mb-3">
-      <label class="font-bold">Como Chegou</label>
-      <textarea pInputTextarea [(ngModel)]="novaEvolucao.comoChegou" rows="3"></textarea>
-    </div>
+        <ng-template pTemplate="header">
+            <div class="flex justify-content-between align-items-center p-3">
+                <span class="font-bold text-lg">
+                    Registrar Nova Sessão
+                </span>
 
-    <div class="field mb-3">
-      <label class="font-bold">Procedimento Realizado</label>
-      <textarea pInputTextarea [(ngModel)]="novaEvolucao.procedimento" rows="4"></textarea>
-    </div>
+                <button
+                    pButton
+                    icon="pi pi-times"
+                    class="p-button-rounded p-button-text"
+                    (click)="exibindoFormEvolucao = false">
+                </button>
+            </div>
+        </ng-template>
 
-    <div class="field mb-3">
-      <label class="font-bold">Como Saiu</label>
-      <textarea pInputTextarea [(ngModel)]="novaEvolucao.comoSaiu" rows="3"></textarea>
-    </div>
+        <div class="grid">
 
-    <div class="flex justify-content-end gap-2 mt-3">
-      <button pButton label="Cancelar" class="p-button-text p-button-secondary p-button-sm" (click)="exibindoFormEvolucao = false"></button>
-      <button pButton label="Confirmar Inclusão" icon="pi pi-check" class="p-button-success p-button-sm" (click)="onConfirmarInclusaoEvolucao()"></button>
-    </div>
-  </div>
+            <div class="field col-12 md:col-3">
+                <label>Data da Consulta</label>
 
-  <p-table 
-    [value]="registro.historicoEvolucoes || []" 
-    responsiveLayout="scroll" 
-    styleClass="p-datatable-striped p-datatable-sm border-1 surface-border"
-    [rows]="5" 
-    [paginator]="true"
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th style="width: 15%">Data</th>
-        <th style="width: 20%">Profissional</th>
-        <th style="width: 20%">Como Chegou</th>
-        <th style="width: 30%">Procedimento</th>
-        <th style="width: 15%">Como Saiu</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-evo>
-      <tr>
-        <td><strong>{{ evo.dataConsulta | date: 'dd/MM/yyyy' }}</strong></td>
-        <td>{{ evo.fisioterapeuta }}</td>
-        <td class="text-ellipse">{{ evo.comoChegou }}</td>
-        <td class="text-ellipse">{{ evo.procedimento }}</td>
-        <td class="text-ellipse">{{ evo.comoSaiu }}</td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="5" class="text-center p-4 text-secondary">
-          Nenhum histórico de atendimento registrado para este paciente.
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+                <p-calendar
+                    [(ngModel)]="novaEvolucao.dataConsulta"
+                    dateFormat="dd/mm/yy"
+                    [showIcon]="true"
+                    appendTo="body">
+                </p-calendar>
+            </div>
+
+            <div class="field col-12 md:col-2">
+                <label>ID Usuário</label>
+
+                <input
+                    pInputText
+                    type="number"
+                    [(ngModel)]="novaEvolucao.fisioterapeuta.id"
+                    (blur)="onBlurPacientePorUsuario()">
+            </div>
+
+            <div class="field col-12 md:col-7">
+                <label>Usuário</label>
+
+                <div class="p-inputgroup">
+
+                    <input
+                        pInputText
+                        [readonly]="true"
+                        [(ngModel)]="novaEvolucao.fisioterapeuta.nome">
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-search"
+                        pTooltip="Pesquisar usuário"
+                        (click)="abrirPesquisaPacientes()">
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Como Chegou</label>
+
+            <textarea
+                pInputTextarea
+                rows="3"
+                autoResize="true"
+                [(ngModel)]="novaEvolucao.comoChegou">
+            </textarea>
+        </div>
+
+        <div class="field">
+            <label>Procedimento Realizado</label>
+
+            <textarea
+                pInputTextarea
+                rows="4"
+                autoResize="true"
+                [(ngModel)]="novaEvolucao.procedimento">
+            </textarea>
+        </div>
+
+        <div class="field">
+            <label>Como Saiu</label>
+
+            <textarea
+                pInputTextarea
+                rows="3"
+                autoResize="true"
+                [(ngModel)]="novaEvolucao.comoSaiu">
+            </textarea>
+        </div>
+
+        <div class="flex justify-content-end gap-2 mt-4">
+
+            <button
+                pButton
+                label="Cancelar"
+                icon="pi pi-times"
+                class="p-button-secondary p-button-outlined"
+                (click)="exibindoFormEvolucao = false">
+            </button>
+
+            <button
+                pButton
+                label="Salvar Evolução"
+                icon="pi pi-check"
+                class="p-button-success"
+                (click)="onConfirmarInclusaoEvolucao()">
+            </button>
+
+        </div>
+
+    </p-card>
+
+    <!-- Tabela -->
+    <p-table
+        [value]="registro.historicoEvolucoes || []"
+        [paginator]="true"
+        [rows]="10"
+        responsiveLayout="scroll"
+        sortField="dataConsulta"
+        [sortOrder]="-1"
+        styleClass="p-datatable-striped">
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="dataConsulta">
+                    Data
+                    <p-sortIcon field="dataConsulta"></p-sortIcon>
+                </th>
+
+                <th>Profissional</th>
+                <th>Como Chegou</th>
+                <th>Procedimento</th>
+                <th>Como Saiu</th>
+                <th style="width: 120px;">Ações</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-evo let-rowIndex="rowIndex">
+            <tr>
+
+                <td>
+                    {{ evo.dataConsulta | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td>
+                    {{ evo.fisioterapeuta?.nome }}
+                </td>
+
+                <td>
+                    {{ evo.comoChegou }}
+                </td>
+
+                <td>
+                    {{ evo.procedimento }}
+                </td>
+
+                <td>
+                    {{ evo.comoSaiu }}
+                </td>
+
+                <td>
+
+                    <button
+                        pButton
+                        pRipple
+                        icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text p-button-warning mr-2"
+                        (click)="editarEvolucao(evo)">
+                    </button>
+
+                    <button
+                        pButton
+                        pRipple
+                        icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-danger"
+                        (click)="excluirEvolucao(evo, rowIndex)">
+                    </button>
+
+                </td>
+
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="6" class="text-center p-5">
+                    <i class="pi pi-info-circle mr-2"></i>
+                    Nenhuma evolução cadastrada.
+                </td>
+            </tr>
+        </ng-template>
+
+    </p-table>
 
 </p-tabPanel>
 

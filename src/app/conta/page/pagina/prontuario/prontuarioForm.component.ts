@@ -4,8 +4,9 @@ import { MessageService } from 'primeng/api';
 import { MensagemAvisoService } from 'src/app/util/mensagemAviso/mensagem-aviso.service';
 
 import { ActivatedRoute, Router } from '@angular/router';
-import { EvolucaoClinica, MarcoMotor, Prontuario } from 'src/app/conta/model/iprontuario.compoent';
+import { EvolucaoClinica, MarcoMotor, Prontuario } from 'src/app/conta/model/iprontuario.component';
 import { ProntuarioService } from 'src/app/conta/service/prontuario.sevice';
+import { EvolucaoService } from 'src/app/conta/service/evolucao.service';
 
 
 
@@ -139,6 +140,8 @@ export class ProntuarioFormComponent implements OnInit {
     private route: ActivatedRoute, // <-- Injete para capturar o :id da URL
     private router: Router,        // <-- Injete para poder voltar à lista
     private prontuarioService: ProntuarioService,
+
+      private evolucaoService: EvolucaoService,
     private http: HttpClient,
     private messageService: MessageService
   ) { }
@@ -161,7 +164,15 @@ export class ProntuarioFormComponent implements OnInit {
   this.exibindoFormEvolucao = true;
   this.novaEvolucao = {
     dataConsulta: new Date(),
-    fisioterapeuta: this.profissionalLogado,
+    fisioterapeuta: {
+      id: 1,
+      nome: "Eliane"
+    },
+
+    prontuario : {
+      id: undefined,
+      nome: undefined
+    },
     comoChegou: '',
     procedimento: '',
     comoSaiu: ''
@@ -207,6 +218,21 @@ export class ProntuarioFormComponent implements OnInit {
         this.loading = false;
       }
     });
+
+
+    this.evolucaoService.getEvolucaoPorPaciente(id).subscribe({
+     next: (dados) => {
+        if (dados) {          
+          this.registro.historicoEvolucoes = dados;         
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar dados.' });
+        this.loading = false;
+      }
+    });
+
   }
 
   private garantirInicializacaoArraysMarcos(): void {
@@ -217,34 +243,20 @@ export class ProntuarioFormComponent implements OnInit {
   }
 
   // --- MÉTODOS DE HISTÓRICO E EVOLUÇÃO ---
-  verificarSublistaHistorico(): void {
-    if (!this.registro.historicoEvolucoes) {
-      this.registro.historicoEvolucoes = [];
-    }
-  }
 
 
 
   onConfirmarInclusaoEvolucao(): void {
-    if (!this.novaEvolucao.comoChegou || !this.novaEvolucao.procedimento) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Atenção',
-        detail: 'Preencha os dados mínimos da evolução antes de salvar.'
-      });
-      return;
-    }
-
-    this.verificarSublistaHistorico();
-    this.registro.historicoEvolucoes?.unshift({ ...this.novaEvolucao });
-    
-    this.exibindoFormEvolucao = false;
-    this.novaEvolucao = {};
-
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Inclusão Local',
-      detail: 'Sessão adicionada à lista temporal. Lembre-se de Salvar o prontuário para gravar definitivo.'
+    this.novaEvolucao.prontuario.id = this.registro.id;
+     this.evolucaoService.salvar(this.novaEvolucao).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Evolução salvo com sucesso!' });
+        this.salvar.emit();
+        this.router.navigate(['/pages/lista-prontuario']);
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o evolução.' });
+      }
     });
   }
 
@@ -429,6 +441,19 @@ export class ProntuarioFormComponent implements OnInit {
     this.cancelar.emit();
   }*/
 
-  onSalvar() { }
+  onSalvar() { 
+
+    this.prontuarioService.salvar(this.registro).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Prontuário salvo com sucesso!' });
+        this.salvar.emit();
+        this.router.navigate(['/pages/lista-prontuario']);
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar o prontuário.' });
+      }
+    });
+
+  }
 }
 

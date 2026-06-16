@@ -8,29 +8,25 @@ import { IUsuario } from '../model/iusuario.component';
 @Injectable({
   providedIn: 'root' // Torna o serviço disponível globalmente na aplicação
 })
-export class ProntuarioService {
+export class UsuarioService {
 
-  private url = "http://localhost:8096/api/prontuarios";
+  private url = "http://localhost:8096/api/usuarios";
 
 
   constructor(private http: HttpClient) {}
 
-  salvar(prontuario: Prontuario): Observable<Prontuario> {
-    return this.http.post<Prontuario>(this.url + "/salvar", prontuario);
+  salvar(usuario: IUsuario): Observable<IUsuario> {
+    return this.http.post<IUsuario>(this.url + "/salvar", usuario);
   }
 
   // Busca todos os prontuários (Mapeado do arquivo de testes)
-  getProntuarios(): Observable<Prontuario[]> {
-    return this.http.get<Prontuario[]>(this.url + "/listar-todos");
+  getUsuarios(): Observable<IUsuario[]> {
+    return this.http.get<IUsuario[]>(this.url + "/listar-todos");
   }
 
-  getProntuarioById(id: number): Observable<Prontuario | undefined> {
-    return this.http.get<Prontuario | undefined>(this.url + "/consulta/" + id);
+  getUsuarioById(id: number): Observable<IUsuario | undefined> {
+    return this.http.get<IUsuario | undefined>(this.url + "/consulta/" + id);
   }
-
-
-
-
 
   listarProntuariosPorFiltro(prontaurio : Prontuario): Observable<Prontuario[]> {
      return this.http.post<Prontuario[]>(this.url + "/filtro", prontaurio);

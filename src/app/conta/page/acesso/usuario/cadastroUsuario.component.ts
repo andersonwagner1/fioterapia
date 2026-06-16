@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FuncaoUsuario, UsuarioPermissao } from '../../../service/autenticacao.service';
 import { ConfirmationService } from 'primeng/api'; // <-- Importando o serviço
 import { BasePermissaoComponent } from '../../base-permissao.component';
-import { CadastroUsuarioCompleto } from '../../../model/iusuario.component';
+import { IUsuario } from '../../../model/iusuario.component';
 
 @Component({
   selector: 'app-cadastro-usuario',
@@ -16,7 +16,7 @@ export class CadastroUsuarioComponent extends BasePermissaoComponent implements 
   // Injeção moderna do serviço de confirmação do PrimeNG
   private confirmationService = inject(ConfirmationService);
 
-  novoUsuario :CadastroUsuarioCompleto = {
+  novoUsuario :IUsuario = {
     nome: '',
     email: '',
     funcao: 'ATENDENTE' as FuncaoUsuario,

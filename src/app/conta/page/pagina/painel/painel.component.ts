@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { Agendamento, AgendamentoService } from '../../../service/agendamento.service';
+import { AgendamentoService } from '../../../service/agendamento.service';
 import { ProntuarioService } from '../../../service/prontuario.sevice';
 import { Router } from '@angular/router';
+import { Agendamento } from 'src/app/conta/model/iagendamento.component';
 
 // Interface auxiliar para tipar o objeto de data enviado pelo template do PrimeNG
 interface PrimeNgDate {
@@ -61,7 +62,7 @@ export class PainelComponent implements OnInit {
         
         this.listaAgendamentos = agendamentos.map(item => ({
           ...item,
-          dataHoraInicio: new Date(item.dataHoraInicio as string)
+          //dataHoraInicio: new Date(item.dataHoraInicio as string)
         }));
 
         this.inicializarMapeamentoEAtendimentos();
@@ -78,13 +79,13 @@ export class PainelComponent implements OnInit {
     this.agendamentosPorDataMap.clear();
 
     this.listaAgendamentos.forEach(agenda => {
-      const data = agenda.dataHoraInicio as Date;
-      const chaveStr = this.gerarChaveData(data.getFullYear(), data.getMonth(), data.getDate());
+      //const data = agenda.dataHoraInicio as Date;
+      //const chaveStr = this.gerarChaveData(data.getFullYear(), data.getMonth(), data.getDate());
       
-      if (!this.agendamentosPorDataMap.has(chaveStr)) {
+      /*if (!this.agendamentosPorDataMap.has(chaveStr)) {
         this.agendamentosPorDataMap.set(chaveStr, []);
       }
-      this.agendamentosPorDataMap.get(chaveStr)?.push(agenda);
+      this.agendamentosPorDataMap.get(chaveStr)?.push(agenda);*/
     });
 
     this.calcularKpis();
@@ -109,7 +110,7 @@ export class PainelComponent implements OnInit {
     const pacientesDoDia = this.obterPacientesDoDia(date);
     if (!pacientesDoDia.length) return 'Nenhum paciente marcado';
 
-    return 'Pacientes:\n' + pacientesDoDia.map(p => `- ${p.nomePaciente} (${p.status})`).join('\n');
+    return 'Pacientes:\n' + pacientesDoDia.map(p => `- ${p.paciente.nome} (${p.status})`).join('\n');
   }
 
   private calcularKpis(): void {
@@ -117,8 +118,9 @@ export class PainelComponent implements OnInit {
     const anoAtual = this.dataAtual.getFullYear();
 
     const agendamentosDoMes = this.listaAgendamentos.filter(a => {
-      const data = a.dataHoraInicio as Date;
-      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+      //const data = a.dataHoraInicio as Date;
+     // return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+     return 0;
     });
 
     this.consultasMes = agendamentosDoMes.length;

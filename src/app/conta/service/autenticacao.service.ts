@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
+import { UsuarioService } from './usuario.sevice';
+import { IUsuario } from '../model/iusuario.component';
+import { HttpClient } from '@angular/common/http';
 
 // Definição dos perfis/funções aceitas no ecossistema da clínica
 export type FuncaoUsuario = 'ADMINISTRADOR' | 'FISIOTERAPEUTA' | 'ATENDENTE';
@@ -29,114 +32,101 @@ export interface TelaSistema {
 })
 export class AutenticacaoService {
 
-  // BANCO DE DADOS EM MEMÓRIA (MOCK): Centraliza as telas, rotas e quem manda em que
-  private telasMock: TelaSistema[] = [
-    {
-      id: 'painel',
-      nome: 'Painel Clínico (Dashboard)',
-      rota: '/pages/painel',
-      modulo: 'Atendimento',
-      permissoesUsuarios: [
-        { idUsuario: 1, nomeUsuario: 'Dr. Anderson', emailUsuario: 'anderson@clinica.com.br', funcao: 'ADMINISTRADOR', visualizar: true, incluir: true, alterar: true },
-        { idUsuario: 2, nomeUsuario: 'Juliana Silva', emailUsuario: 'juliana@clinica.com.br', funcao: 'ATENDENTE', visualizar: true, incluir: false, alterar: false }
-      ]
-    },
-    {
-      id: 'agenda',
-      nome: 'Agenda de Sessões',
-      rota: '/pages/agenda',
-      modulo: 'Agendamento',
-      permissoesUsuarios: [
-        { idUsuario: 1, nomeUsuario: 'Dr. Anderson', emailUsuario: 'anderson@clinica.com.br', funcao: 'ADMINISTRADOR', visualizar: true, incluir: true, alterar: true },
-        { idUsuario: 2, nomeUsuario: 'Juliana Silva', emailUsuario: 'juliana@clinica.com.br', funcao: 'ATENDENTE', visualizar: true, incluir: true, alterar: true }
-      ]
-    },
-    {
-      id: 'prontuario',
-      nome: 'Prontuário e Evolução Clínica',
-      rota: '/pages/prontuario',
-      modulo: 'Clínico',
-      permissoesUsuarios: [
-        { idUsuario: 1, nomeUsuario: 'Dr. Anderson', emailUsuario: 'anderson@clinica.com.br', funcao: 'ADMINISTRADOR', visualizar: true, incluir: true, alterar: true },
-        { idUsuario: 2, nomeUsuario: 'Juliana Silva', emailUsuario: 'juliana@clinica.com.br', funcao: 'ATENDENTE', visualizar: false, incluir: false, alterar: false } // Bloqueio LGPD estrutural
-      ]
-    },
-    {
-      id: 'config',
-      nome: 'Configurações de Acesso',
-      rota: '/pages/config',
-      modulo: 'Segurança',
-      permissoesUsuarios: [
-        { idUsuario: 1, nomeUsuario: 'Dr. Anderson', emailUsuario: 'anderson@clinica.com.br', funcao: 'ADMINISTRADOR', visualizar: true, incluir: true, alterar: true },
-        { idUsuario: 2, nomeUsuario: 'Juliana Silva', emailUsuario: 'juliana@clinica.com.br', funcao: 'ATENDENTE', visualizar: false, incluir: false, alterar: false }
-      ]
-    }
-  ];
+  
+  public isAuthenticated = signal<boolean>(this.hasToken());
 
   // Estado volátil do usuário autenticado no momento
   private usuarioLogado: any = null;
 
-  constructor() { }
+    private url = "http://localhost:8096/api/usuarios";
+
+  constructor(private http: HttpClient) {}
+
+
+  private hasToken(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  // Retorna o token salvo para os interceptors
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  loginToken(resposta: any) {
+  const tokenPuro = resposta && resposta.token ? resposta.token : resposta;
+  localStorage.setItem('token', tokenPuro);
+  this.isAuthenticated.set(true);
+}
+
+  logout() {
+    localStorage.removeItem('token');
+    this.isAuthenticated.set(false);
+    // Redirecionar para a tela de login, se necessário
+  }
+
+  isTokenExpired(): boolean {
+    
+  const token = this.getToken();
+  console.log(token);
+  if (!token) return true;
+
+  try {
+    // 1. Pega a parte do meio (o payload do JWT)
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return true;
+
+    // 2. Substitui os caracteres do padrão JWT para o Base64 padrão que o atob entende
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // 3. Decodifica a string com segurança lidando com acentos/caracteres especiais
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+
+    // 4. Transforma em objeto e pega a expiração
+    const expiry = JSON.parse(jsonPayload).exp;
+    
+    // 5. Compara com o tempo atual em segundos
+    const tempoAtual = Math.floor((new Date()).getTime() / 1000);
+    
+    return tempoAtual >= expiry;
+
+  } catch (e) {
+    // Se cair aqui, vamos printar o erro real no console do navegador (F12) para saber o motivo
+    console.error("Erro crítico ao decodificar o token JWT:", e);
+    return true; 
+  }
+}
+
+  
 
   /**
    * Realiza a autenticação varrendo a matriz reversa de telas para montar a sessão
    * @param email E-mail digitado no formulário
    * @param senha Senha informada (Padrão mock: 123456)
    */
-  login(email: string, senha: string): Observable<any> {
-    const emailLimpo = email.trim().toLowerCase();
+login(usuario : IUsuario): Observable<any> {
+  return this.http.post<any>(`${this.url}/autenticacao`, usuario);
+}
 
-    if (senha !== '123456') {
-      return throwError(() => new Error('Senha incorreta. Use a senha padrão: 123456'));
-    }
 
-    let usuarioEncontrado: any = null;
-
-    // Varre as telas para encontrar o cadastro básico do usuário através do e-mail
-    for (const tela of this.telasMock) {
-      const permissaoUsuario = tela.permissoesUsuarios.find(p => p.emailUsuario.toLowerCase() === emailLimpo);
-
-      if (permissaoUsuario) {
-        usuarioEncontrado = {
-          id: permissaoUsuario.idUsuario,
-          nome: permissaoUsuario.nomeUsuario,
-          funcao: permissaoUsuario.funcao,
-          email: emailLimpo
-        };
-        break; // Usuário mapeado, interrompe a busca
-      }
-    }
-
-    if (usuarioEncontrado) {
-      this.usuarioLogado = usuarioEncontrado;
-      localStorage.setItem('usuario_clinica', JSON.stringify(usuarioEncontrado));
-      return of(usuarioEncontrado);
-    }
-
-    return throwError(() => new Error('Usuário não cadastrado no sistema.'));
-  }
-
-  /**
-   * Destrói os tokens e dados locais efetuando a desconexão segura do profissional
-   */
-  logout(): void {
-    this.usuarioLogado = null;
-    localStorage.removeItem('usuario_clinica');
-  }
-
+  
   /**
    * Verifica em tempo de execução se o usuário ativo pode Visualizar, Incluir ou Alterar em uma tela específica.
    * Utilizado por Guards de rotas e diretivas estruturais como *ngIf no HTML.
    */
   temPermissao(telaId: string, acao: 'visualizar' | 'incluir' | 'alterar'): boolean {
-    const usuarioSessao = this.getUsuarioLogado();
+   /* const usuarioSessao = this.getUsuarioLogado();
     if (!usuarioSessao) return false;
 
     const tela = this.telasMock.find(t => t.id === telaId);
     if (!tela) return false;
 
-    const permissao = tela.permissoesUsuarios.find(p => p.idUsuario === usuarioSessao.id);
-    return permissao ? (permissao as any)[acao] === true : false;
+    const permissao = tela.permissoesUsuarios.find(p => p.idUsuario === usuarioSessao.id);*/
+    return true; //permissao ? (permissao as any)[acao] === true : false;
   }
 
   /**
@@ -171,21 +161,14 @@ export class AutenticacaoService {
    * Retorna a lista completa de telas e rotas para alimentação do painel do Administrador
    */
   getTelasSistemas(): Observable<TelaSistema[]> {
-    return of(this.telasMock);
+    return null;
   }
 
   /**
    * Altera a linha de permissão de um usuário específico de dentro de uma tela escolhida
    */
   salvarPermissaoTela(telaId: string, permissaoAtualizada: UsuarioPermissao): Observable<boolean> {
-    const tela = this.telasMock.find(t => t.id === telaId);
-    if (tela) {
-      const idx = tela.permissoesUsuarios.findIndex(p => p.idUsuario === permissaoAtualizada.idUsuario);
-      if (idx !== -1) {
-        tela.permissoesUsuarios[idx] = { ...permissaoAtualizada };
-        return of(true);
-      }
-    }
-    return of(false);
+  
+    return of(true);
   }
 }

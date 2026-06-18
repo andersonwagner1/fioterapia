@@ -7,7 +7,11 @@ export interface AgendamentoRespostaDto {
   horaInicial: string;
   horaFinal: string;
   nome : String;
-  profissional: string
+
+  prontuarioId : number;
+  profissional: string;
+
+  dtInicial : Date;
 
   tipoSessao: string;
   icSituacao : string;

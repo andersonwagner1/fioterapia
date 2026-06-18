@@ -38,40 +38,37 @@
     </ng-template>
     <ng-template pTemplate="body" let-agendado>
       <tr>
-    <td>{{ agendado.horaInicial }}</td>
-        <td>
-            {{ agendado.nome }}
-        </td>
-        
-        <td>{{ agendado.tipoSessao }}</td>
-        <td>{{ agendado.profissional }}</td>
-        <td>
-          <div class="flex align-items-center gap-2 font-medium">
-            <i [class]="getStatusIcon(agendado.icSituacao)" 
-               [ngClass]="{
-                 'text-green-500 text-xl': agendado.icSituacao === 'Confirmado',
-                 'text-blue-500 text-xl': agendado.icSituacao === 'Agendado',
-                 'text-red-500 text-xl': agendado.icSituacao === 'Cancelado',
-                 'text-600 text-xl': agendado.icSituacao === 'Finalizado'
-               }">
-            </i>
-            <span [ngClass]="{
-                 'text-green-700': agendado.icSituacao === 'Confirmado',
-                 'text-blue-700': agendado.icSituacao === 'Agendado',
-                 'text-red-700': agendado.icSituacao === 'Cancelado',
-                 'text-700': agendado.icSituacao === 'Finalizado'
-               }">
-              {{ agendado.icSituacao }}
-            </span>
-          </div>
-        </td>
+          <td>{{ agendado.horaInicial }}</td>
+          <td>{{ agendado.nome }}</td>
+          <td>{{ agendado.tipoSessao }}</td>
+          <td>{{ agendado.profissional }}</td>
+          <td>
+            <div class="flex align-items-center gap-2 font-medium">
+              <i [class]="getStatusIcon(agendado.icSituacao)" 
+                 [ngClass]="{
+                  'text-green-500 text-xl': agendado.icSituacao === 'Confirmado',
+                  'text-blue-500 text-xl': agendado.icSituacao === 'Agendado',
+                  'text-red-500 text-xl': agendado.icSituacao === 'Cancelado',
+                  'text-600 text-xl': agendado.icSituacao === 'Finalizado'
+                }">
+              </i>
+              <span [ngClass]="{
+                  'text-green-700': agendado.icSituacao === 'Confirmado',
+                  'text-blue-700': agendado.icSituacao === 'Agendado',
+                  'text-red-700': agendado.icSituacao === 'Cancelado',
+                  'text-700': agendado.icSituacao === 'Finalizado'
+                }">
+                {{ agendado.icSituacao }}
+              </span>
+            </div>
+          </td>
         <td>
           <div class="flex align-items-center gap-2">
             <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-success mr-2" (click)="onEditarAgendamento(agendado)"></button>
             <button pButton pRipple icon="pi pi-file" class="p-button-rounded p-button-text p-button-success mr-2" (click)="onAbrirProntuario(agendado)"></button>
           </div>
         </td>
-      </tr>d
+      </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
@@ -83,10 +80,22 @@
   </p-table>
 </div>
 
-<p-dialog [(visible)]="agendaDialog" [style]="{ width: '550px' }" header="Detalhes do Agendamento" [modal]="true" styleClass="p-fluid">
+<p-dialog 
+  [(visible)]="agendaDialog" 
+  [style]="{ width: '550px' }" 
+  [modal]="true" 
+  styleClass="p-fluid">
+  
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-calendar-plus text-primary text-xl"></i>
+      <span class="font-semibold text-xl">Detalhes do Agendamento</span>
+    </div>
+  </ng-template>
+  
   <ng-template pTemplate="content">
     
-    <div *ngIf="agendamento && agendamento.paciente" class="grid col-12 p-0 m-0 mb-3">
+    <div *ngIf="agendamento?.paciente" class="grid col-12 p-0 m-0 mb-3">
       
       <div class="field col-4 pl-0 pb-0 mb-0">
         <label for="prontuarioId">Nº Prontuário</label>
@@ -116,6 +125,7 @@
             icon="pi pi-search" 
             class="p-button-primary"
             pTooltip="Pesquisar Paciente"
+            tooltipPosition="top"
             (click)="abrirPesquisaPacientes()">
           </button>
         </div>
@@ -137,9 +147,9 @@
     </div>
 
     <div class="field col-12 mb-3">
-      <label for="dataInicio">Data e Horário de Final</label>
+      <label for="dataFinal">Data e Horário de Final</label>
       <p-calendar 
-        id="dataInicio" 
+        id="dataFinal" 
         [(ngModel)]="agendamento.dtHoraFinal" 
         [showTime]="true" 
         [showIcon]="true"
@@ -152,36 +162,47 @@
     <div class="grid col-12 p-0 m-0">
       <div class="field col-6 mb-3 pl-0">
         <label for="tipoSessao">Tipo de Sessão</label>
-        <p-dropdown id="tipoSessao" [options]="tipoSessaoOptions" [(ngModel)]="agendamento.tipoSessao"></p-dropdown>
+        <p-dropdown 
+          id="tipoSessao" 
+          [options]="tipoSessaoOptions" 
+          [(ngModel)]="agendamento.tipoSessao"
+          placeholder="Selecione">
+        </p-dropdown>
       </div>
+      
       <div class="field col-6 mb-3 pr-0">
         <label for="status">Status</label>
-        <p-dropdown id="status" [options]="statusOptions" [(ngModel)]="agendamento.icSituacao"></p-dropdown>
+        <p-dropdown 
+          id="status" 
+          [options]="statusOptions" 
+          [(ngModel)]="agendamento.icSituacao"
+          placeholder="Selecione">
+        </p-dropdown>
       </div>
     </div>
 
-    <div *ngIf="agendamento && agendamento.paciente" class="grid col-12 p-0 m-0 mb-3">
+    <div *ngIf="agendamento?.usuario" class="grid col-12 p-0 m-0 mb-3">
       
       <div class="field col-4 pl-0 pb-0 mb-0">
-        <label for="prontuarioId">Id Usuario</label>
+        <label for="usuarioId">Cod: Fisioterapia</label>
         <input 
           type="number" 
           pInputText 
-          id="prontuarioId" 
+          id="usuarioId" 
           [(ngModel)]="agendamento.usuario.id" 
           (blur)="onBlurPacientePorUsuario()"
-           />
+          placeholder="Ex: 12" />
       </div>
 
       <div class="field col-8 pr-0 pb-0 mb-0">
-        <label for="usuario">Usuario</label>
+        <label for="usuarioNome">Fisioterapia</label>
         <div class="p-inputgroup">
           <input 
             type="text" 
             pInputText 
-            id="usuarioId" 
+            id="usuarioNome" 
             [(ngModel)]="agendamento.usuario.nome" 
-             />
+            placeholder="Nome do usuário..." />
           
           <button 
             type="button" 
@@ -189,22 +210,44 @@
             pRipple 
             icon="pi pi-search" 
             class="p-button-primary"
-            pTooltip="Pesquisar Paciente"
-            (click)="abrirPesquisaPacientes()">
+            pTooltip="Pesquisar Usuário"
+            tooltipPosition="top"
+            (click)="onBlurPacientePorUsuario()">
           </button>
         </div>
       </div>
 
     </div>
+
     <div class="field col-12 mb-3">
       <label for="observacoes">Observações / Queixas</label>
-      <textarea id="observacoes" pInputTextarea [(ngModel)]="agendamento.dsObservacaoQueixas" rows="3"></textarea>
+      <textarea 
+        id="observacoes" 
+        pInputTextarea 
+        [(ngModel)]="agendamento.dsObservacaoQueixas" 
+        rows="3" 
+        [autoResize]="true">
+      </textarea>
     </div>
 
   </ng-template>
 
   <ng-template pTemplate="footer">
-    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="agendaDialog = false"></button>
-    <button pButton pRipple label="Confirmar Horário" icon="pi pi-check" class="p-button-primary" (click)="onSalvarAgendamento()"></button>
+    <button 
+      pButton 
+      pRipple 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      class="p-button-text p-button-secondary" 
+      (click)="agendaDialog = false">
+    </button>
+    <button 
+      pButton 
+      pRipple 
+      label="Confirmar Horário" 
+      icon="pi pi-save" 
+      class="p-button-primary" 
+      (click)="onSalvarAgendamento()">
+    </button>
   </ng-template>
 </p-dialog>

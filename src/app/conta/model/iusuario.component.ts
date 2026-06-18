@@ -5,6 +5,8 @@ export interface IUsuario {
 
   nome: string;
   email?: string;
+
+  senha?: string;
   funcao?: 'ADMINISTRADOR' | 'FISIOTERAPEUTA' | 'ATENDENTE';
   ativo?: boolean;
 

@@ -25,6 +25,11 @@ export class AgendamentoService {
      return this.http.get<Agendamento[]>(this.url + "/listar-todos");
    }
 
+
+   getListaAgendamentosAguardandoAtendimento(): Observable<AgendamentoRespostaDto[]> {
+     return this.http.get<AgendamentoRespostaDto[]>(this.url + "/listar-agendamento-em-aberto");
+   }
+
     consultarAgendamentoPorData(dtFiltro : Date): Observable<AgendamentoRespostaDto[]> {
      return this.http.post<AgendamentoRespostaDto[]>(this.url + "/listar-por-data",dtFiltro);
    }

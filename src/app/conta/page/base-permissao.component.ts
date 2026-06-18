@@ -24,17 +24,17 @@ export abstract class BasePermissaoComponent implements OnInit {
    * Se não tiver, expulsa ele de volta para o painel.
    */
   protected verificarAcessoTela(): void {
-    if (!this.authService.temPermissao(this.telaId, 'visualizar')) {
+    /*if (!this.authService.temPermissao(this.telaId, 'visualizar')) {
       console.error(`[Segurança] Acesso negado para a tela: ${this.telaId}`);
       this.router.navigate(['/pages/painel']);
-    }
+    }*/
   }
 
   /**
    * Atalho rápido para testar a permissão de INCLUIR na tela atual
    */
   protected oPodeIncluir(): boolean {
-    return this.authService.temPermissao(this.telaId, 'incluir');
+    return true; //this.authService.temPermissao(this.telaId, 'incluir');
   }
 
   /**

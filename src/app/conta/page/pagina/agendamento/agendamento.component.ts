@@ -244,9 +244,9 @@ export class AgendamentoComponent extends BasePermissaoComponent implements OnIn
 
 
    onBlurPacientePorProntuario(): void {
-    if (!this.agendamento.usuario?.id) return;
+    if (!this.agendamento.paciente?.id) return;
 
-    this.prontuarioService.getProntuarioById(this.agendamento.usuario.id).subscribe({
+    this.prontuarioService.getProntuarioById(this.agendamento.paciente.id).subscribe({
       next: (usuario) => {
         if (usuario) { 
           // 💡 Ajuste: Injeta o prontuário encontrado atualizando o input do nome automaticamente

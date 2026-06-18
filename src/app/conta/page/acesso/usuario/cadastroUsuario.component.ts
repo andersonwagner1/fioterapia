@@ -1,13 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 
 import { FuncaoUsuario, UsuarioPermissao } from '../../../service/autenticacao.service';
-import { ConfirmationService } from 'primeng/api'; // <-- Importando o serviço
+import { ConfirmationService, MessageService } from 'primeng/api'; // <-- Importando o serviço
 import { BasePermissaoComponent } from '../../base-permissao.component';
 import { IUsuario } from '../../../model/iusuario.component';
+import { UsuarioService } from 'src/app/conta/service/usuario.sevice';
 
 @Component({
   selector: 'app-cadastro-usuario',
-  templateUrl: './cadastroUsuario.component.html'
+  templateUrl: './cadastroUsuario.component.html',
+    providers: [MessageService]
 })
 export class CadastroUsuarioComponent extends BasePermissaoComponent implements OnInit {
 
@@ -33,7 +35,7 @@ export class CadastroUsuarioComponent extends BasePermissaoComponent implements 
 
   loading = false;
 
-  constructor() {
+  constructor(private usuarioService : UsuarioService, private messageService: MessageService ) {
     super();
   }
 
@@ -45,8 +47,6 @@ export class CadastroUsuarioComponent extends BasePermissaoComponent implements 
    * Dispara o fluxo de confirmação visual na tela
    */
   confirmarSalvamento(): void {
-    if (!this.oPodeIncluir()) return;
-    if (!this.novoUsuario.nome || !this.novoUsuario.email) return;
 
     this.confirmationService.confirm({
       message: `Deseja realmente cadastrar o profissional <strong>${this.novoUsuario.nome}</strong> com o perfil de <strong>${this.novoUsuario.funcao}</strong> no sistema?`,
@@ -69,45 +69,37 @@ export class CadastroUsuarioComponent extends BasePermissaoComponent implements 
   private executarSalvamento(): void {
     this.loading = true;
 
-    this.authService.getTelasSistemas().subscribe(telas => {
-      const novoIdUsuario = Math.floor(Math.random() * 1000) + 3; 
 
-      telas.forEach(tela => {
-        const novaPermissaoTela: UsuarioPermissao = {
-          idUsuario: novoIdUsuario,
-          nomeUsuario: this.novoUsuario.nome,
-          emailUsuario: this.novoUsuario.email,
-          funcao: this.novoUsuario.funcao,
-          visualizar: this.definirVisualizacaoPadrao(this.novoUsuario.funcao, tela.id),
-          incluir: this.novoUsuario.funcao === 'ADMINISTRADOR' || (this.novoUsuario.funcao === 'ATENDENTE' && tela.id === 'agenda'),
-          alterar: this.novoUsuario.funcao === 'ADMINISTRADOR' || (this.novoUsuario.funcao === 'ATENDENTE' && tela.id === 'agenda')
-        };
-        tela.permissoesUsuarios.push(novaPermissaoTela);
-      });
+    this.usuarioService.salvar(this.novoUsuario).subscribe({
+      next: (usuarioLogado) => {
+        
+        this.confirmationService.confirm({
+            message: `Salvo com sucesso`,
+            header: 'Confirmar Cadastro de Usuário',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Okay',
+            
+            acceptButtonStyleClass: 'p-button-primary',            
+            accept: () => {
+              // Se clicar em SIM, executa a gravação de fato
+              
+            }
+    });
+        
+      
+      },
+      error: (err) => {
+          this.loading = false;
 
-      this.loading = false;
-
-      // Abre um segundo ConfirmDialog, agindo como modal informativo de Sucesso
-      this.confirmationService.confirm({
-        message: `O colaborador <strong>${this.novoUsuario.nome}</strong> foi registrado com sucesso e suas diretrizes de acesso foram criadas.`,
-        header: 'Sucesso!',
-        icon: 'pi pi-check-circle text-green-500 text-2xl',
-        rejectVisible: false, // Esconde o botão de cancelar
-        acceptLabel: 'OK',
-        acceptButtonStyleClass: 'p-button-success',
-        accept: () => {
-          // Limpa o formulário e navega de volta para as tabelas
-          
-          this.router.navigate(['/pages/config']);
-        }
-      });
+       this.messageService.add({
+  severity: 'error', // Define o estilo de erro (vermelho)
+  summary: 'Erro no Cadastro',
+  detail: 'Não foi possível salvar os dados do usuário.',
+  life: 4000 // Tempo em milissegundos para sumir sozinho
+});
+      }
     });
   }
 
-  private definirVisualizacaoPadrao(funcao: FuncaoUsuario, telaId: string): boolean {
-    if (funcao === 'ADMINISTRADOR') return true;
-    if (funcao === 'FISIOTERAPEUTA' && telaId !== 'config') return true;
-    if (funcao === 'ATENDENTE' && (telaId === 'painel' || telaId === 'agenda')) return true;
-    return false;
-  }
+  
 }

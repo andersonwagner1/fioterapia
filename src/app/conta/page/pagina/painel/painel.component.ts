@@ -42,11 +42,11 @@ export class PainelComponent implements OnInit {
   }
 
   irParaProntuario(prontuarioId: number | undefined): void {
-    if (prontuarioId) {
+    //if (prontuarioId) {
       this.router.navigate(['/pages/prontuario', prontuarioId]);
-    } else {
-      console.warn('Este agendamento não possui um prontuário vinculado.');
-    }
+    //} else {
+     // console.warn('Este agendamento não possui um prontuário vinculado.');
+    //}
   }
 
   carregarDadosPainel(): void {
@@ -55,15 +55,16 @@ export class PainelComponent implements OnInit {
     // Executa as requisições em paralelo de forma limpa e segura
     forkJoin({
       prontuarios: this.prontuarioService.getProntuarios(),
-      agendamentos: this.agendamentoService.getAgendamentos()
+      agendamentos: this.agendamentoService.getListaAgendamentosAguardandoAtendimento()
     }).subscribe({
       next: ({ prontuarios, agendamentos }) => {
         this.totalPacientesCadastrados = prontuarios.length;
-        
-        this.listaAgendamentos = agendamentos.map(item => ({
-          ...item,
-          //dataHoraInicio: new Date(item.dataHoraInicio as string)
-        }));
+        this.listaAgendamentos = agendamentos;
+        console.log(this.listaAgendamentos)
+        ;
+        this.consultasMes = agendamentos.filter(a => a.icSituacao === 'Confirmado' || a.icSituacao === 'Agendado').length;        
+        this.consultasConfirmadas = agendamentos.filter(a => a.icSituacao === 'Confirmado' || a.icSituacao === 'Finalizado').length;
+        this.consultasCanceladas = agendamentos.filter(a => a.icSituacao === 'Cancelado').length;
 
         this.inicializarMapeamentoEAtendimentos();
         this.loading = false;
@@ -114,18 +115,7 @@ export class PainelComponent implements OnInit {
   }
 
   private calcularKpis(): void {
-    const mesAtual = this.dataAtual.getMonth();
-    const anoAtual = this.dataAtual.getFullYear();
 
-    const agendamentosDoMes = this.listaAgendamentos.filter(a => {
-      //const data = a.dataHoraInicio as Date;
-     // return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
-     return 0;
-    });
-
-    this.consultasMes = agendamentosDoMes.length;
-    this.consultasConfirmadas = agendamentosDoMes.filter(a => a.status === 'Confirmado' || a.status === 'Finalizado').length;
-    this.consultasCanceladas = agendamentosDoMes.filter(a => a.status === 'Cancelado').length;
   }
 
   // Método centralizador de chaves para evitar divergências de fuso horário

@@ -8,6 +8,8 @@ export interface Agendamento {
 
   dataHoraInicio?: String;
   dataHoraFim?: String;
+
+   prontuarioId? : number;
   profissional?: string;
   tipoSessao?: string;
   status?: string;

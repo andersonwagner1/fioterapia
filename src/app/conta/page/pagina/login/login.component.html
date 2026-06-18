@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="flex align-items-center justify-content-center min-h-screen bg-gray-100 p-4">
   <div class="card p-5 shadow-3 border-round bg-white w-full md:w-30rem">
     
@@ -5,7 +6,7 @@
       <div class="inline-flex align-items-center justify-content-center bg-primary border-round mb-3" style="width: 4rem; height: 4rem">
         <i class="pi pi-heart-fill text-white text-3xl"></i>
       </div>
-      <h2 class="text-3xl font-bold text-gray-900 m-0">ClinikIDS</h2>
+      <h2 class="text-3xl font-bold text-gray-900 m-0">NeuroPassos</h2>
       <p class="text-600 mt-2">Plataforma de Gestão de Fisioterapia</p>
     </div>
 
@@ -16,7 +17,7 @@
         <label for="email" class="font-medium text-800">E-mail Profissional</label>
         <span class="p-input-icon-left">
           <i class="pi pi-envelope"></i>
-          <input id="email" type="email" pInputText [(ngModel)]="email" placeholder="anderson@clinica.com.br" />
+          <input id="email" type="TEXT" pInputText [(ngModel)]="usuario.email" placeholder="anderson@clinica.com.br" />
         </span>
       </div>
 
@@ -24,7 +25,7 @@
         <label for="senha" class="font-medium text-800">Senha de Acesso</label>
         <span class="p-input-icon-left">
           <i class="pi pi-lock"></i>
-          <input id="senha" type="password" pInputText [(ngModel)]="senha" placeholder="Senha padrão: 123456" (keyup.enter)="onLogin()" />
+          <input id="senha" type="password" pInputText [(ngModel)]="usuario.senha" placeholder="Senha padrão: 123456" (keyup.enter)="onLogin()" />
         </span>
       </div>
 

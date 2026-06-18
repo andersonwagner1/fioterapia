@@ -22,7 +22,7 @@
     <div class="col-12 md:col-3 p-2">
       <div class="card p-3 border-round shadow-1 bg-white flex justify-content-between align-items-center">
         <div>
-          <span class="block text-500 font-medium mb-2">Agendados (Mês)</span>
+          <span class="block text-500 font-medium mb-2">Proximas consultas</span>
           <div class="text-900 font-bold text-3xl">{{ consultasMes }}</div>
         </div>
         <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem; height:2.5rem">
@@ -56,8 +56,9 @@
     </div>
   </div>
 
+ 
   <div class="grid col-12 p-0">
-    
+    <!--
     <div class="col-12 lg:col-5 p-2">
       <div class="card p-4 border-round shadow-1 bg-white h-full">
         <h3 class="text-gray-800 font-semibold mb-3">
@@ -93,8 +94,8 @@
         </p-calendar>
       </div>
     </div>
-
-    <div class="col-12 lg:col-7 p-2">
+-->
+    <div class="col-12 lg:col-12 p-2">
       <div class="card p-4 border-round shadow-1 bg-white h-full">
   <h3 class="text-gray-800 font-semibold mb-3">
     <i class="pi pi-list mr-2 text-primary"></i>Fluxo de Atendimento Geral
@@ -106,13 +107,13 @@
         <th>Data/Hora</th>
         <th>Paciente</th>
         <th>Procedimento</th>
-        <th>Status</th>
+        <th>Situação</th>
         <th style="width: 5rem" class="text-center">Ações</th> </tr>
     </ng-template>
     <ng-template pTemplate="body" let-agenda>
       <tr>
-        <td>{{ agenda.dataHoraInicio | date: 'dd/MM - HH:mm' }}</td>
-        <td><strong>{{ agenda.nomePaciente }}</strong></td>
+        <td>{{agenda.dtInicial  | date: 'dd/MM/yyyy'}} - {{ agenda.horaInicial  }}</td>
+        <td><strong>{{ agenda.nome }}</strong></td>
         <td class="text-sm">{{ agenda.tipoSessao }}</td>
         <td>
           <span class="text-xs font-bold px-2 py-1 border-round"
@@ -121,7 +122,7 @@
                   'bg-blue-100 text-blue-700': agenda.status === 'Agendado',
                   'bg-red-100 text-red-700': agenda.status === 'Cancelado'
                 }">
-            {{ agenda.status }}
+            {{ agenda.icSituacao }}
           </span>
         </td>
         <td class="text-center">
@@ -132,7 +133,7 @@
             class="p-button-rounded p-button-text p-button-info"
             pTooltip="Abrir Prontuário"
             tooltipPosition="left"
-            [disabled]="!agenda.prontuarioId"
+            [disabled]="!agenda.id"
             (click)="irParaProntuario(agenda.prontuarioId)">
           </button>
         </td>

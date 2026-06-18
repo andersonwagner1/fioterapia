@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="p-4 bg-gray-100 min-h-screen flex justify-content-center align-items-start">
   <div class="card p-4 border-round shadow-1 bg-white w-full md:w-38rem mt-2">
     
@@ -22,7 +23,7 @@
         <label class="font-semibold text-xs text-700 block mb-1">Nome Completo</label>
         <span class="p-input-icon-left">
           <i class="pi pi-user"></i>
-          <input type="text" pInputText [(ngModel)]="novoUsuario.nome" placeholder="Ex: Dra. Viviane de Castro Lima" [disabled]="!oPodeIncluir()" />
+          <input type="text" pInputText [(ngModel)]="novoUsuario.nome"  [disabled]="!oPodeIncluir()" />
         </span>
       </div>
 

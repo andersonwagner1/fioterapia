@@ -49,7 +49,7 @@
     <div class="table-wrap"><table><thead><tr><th>Posição</th><th>Prévios</th><th>Na janela</th><th>Subescala</th></tr></thead><tbody><tr *ngFor="let sub of subescalas"><td><span class="dot" [style.background]="sub.cor"></span>{{ sub.nome }}</td><td>{{ pontuar(sub).previos }}</td><td>{{ pontuar(sub).janela }}</td><td><strong>{{ pontuar(sub).total }}</strong></td></tr></tbody></table></div>
     <div class="score-band"><div><span>Pontuação total</span><strong>{{ total }} <small>/ 58</small></strong></div><div class="classification" [ngClass]="classificacao.classe">{{ classificacao.texto }}</div></div>
     <div class="chart-wrap"><canvas #grafico width="900" height="440" aria-label="Gráfico de percentis AIMS"></canvas></div>
-    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
+    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]" [style.border-color]="cores[p]" [class.dashed]="p !== 5 && p !== 90"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
     <div class="history-example"><strong>Exemplo de evolução</strong><span *ngFor="let ponto of historicoExemplo">{{ ponto.idadeMeses }} mês: {{ ponto.pontuacao }} pontos</span></div>
     <p class="note">O gráfico de percentis foi digitalizado a partir da curva de referência da Escala Motora Infantil de Alberta (Piper &amp; Darrah) e serve como apoio visual e educativo. Para decisões clínicas formais, utilize a tabela normativa oficial do manual da AIMS.</p>
     <label class="observations"><span>Observações / Recomendações</span><textarea rows="4" [(ngModel)]="observacoes" (ngModelChange)="atualizar()" placeholder="Registre observações clínicas, recomendações e condutas"></textarea></label>
@@ -90,7 +90,7 @@
     <p class="relatorio-score">Pontuação total: <strong>{{ total }} / 58</strong></p>
     <p>{{ classificacao.texto }}</p>
     <img *ngIf="graficoParaImpressao" [src]="graficoParaImpressao" alt="Gráfico de percentis AIMS">
-    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
+    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]" [style.border-color]="cores[p]" [class.dashed]="p !== 5 && p !== 90"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
     <div class="history-example"><strong>Exemplo de evolução</strong><span *ngFor="let ponto of historicoExemplo">{{ ponto.idadeMeses }} mês: {{ ponto.pontuacao }} pontos</span></div>
   </section>
 </main>

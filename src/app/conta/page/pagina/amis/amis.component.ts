@@ -154,10 +154,10 @@ export class AmisComponent implements OnInit, AfterViewInit {
     for(let m=0;m<=19;m++){ ctx.beginPath();ctx.moveTo(x(m),t);ctx.lineTo(x(m),t+ph);ctx.stroke(); }
     for(let v=0;v<=60;v+=5){ ctx.beginPath();ctx.moveTo(l,y(v));ctx.lineTo(l+pw,y(v));ctx.stroke(); }
     ctx.fillStyle='#475569';ctx.font='11px sans-serif';ctx.textAlign='center';for(let m=0;m<=19;m++)ctx.fillText(String(m),x(m),t+ph+17);ctx.fillText('Idade (meses)',l+pw/2,h-5);ctx.textAlign='right';for(let v=0;v<=60;v+=5)ctx.fillText(String(v),l-7,y(v)+4);
-    Object.keys(this.percentis).map(Number).forEach(p=>{ctx.beginPath();ctx.strokeStyle=this.cores[p];ctx.lineWidth=p===50?2.6:2;this.percentis[p].forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.lineTo(x(19),y(58));ctx.stroke();});
-    ctx.beginPath();ctx.strokeStyle='#0f766e';ctx.lineWidth=2.5;
+    Object.keys(this.percentis).map(Number).forEach(p=>{ctx.beginPath();ctx.strokeStyle=this.cores[p];ctx.lineWidth=p===50?2.6:2;ctx.setLineDash(p===5||p===90?[]:[7,5]);this.percentis[p].forEach((v,i)=>i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));ctx.lineTo(x(19),y(58));ctx.stroke();});
+    ctx.setLineDash([]);ctx.beginPath();ctx.strokeStyle='#00d9ff';ctx.lineWidth=2.5;
     this.historicoExemplo.forEach((ponto,i)=>i?ctx.lineTo(x(ponto.idadeMeses),y(ponto.pontuacao)):ctx.moveTo(x(ponto.idadeMeses),y(ponto.pontuacao)));ctx.stroke();
-    this.historicoExemplo.forEach(ponto=>{const px=x(ponto.idadeMeses),py=y(ponto.pontuacao);ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fillStyle='#0f766e';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#0f766e';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(`${ponto.idadeMeses}m`,px,py-9);});
+    this.historicoExemplo.forEach(ponto=>{const px=x(ponto.idadeMeses),py=y(ponto.pontuacao);ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fillStyle='#00d9ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#00d9ff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(`${ponto.idadeMeses}m`,px,py-9);});
     const idade=this.idadeClassificacao;if(idade!==null){const px=x(Math.min(idade,19)),py=y(this.total);ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);ctx.fillStyle='#0f172a';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#fff';ctx.stroke();}
     ctx.strokeStyle='#94a3b8';ctx.lineWidth=1.2;ctx.strokeRect(l,t,pw,ph);
   }

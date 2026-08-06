@@ -35,6 +35,9 @@ export class AppMenuComponent implements OnInit {
                         {
                             label: "Agenda", routerLink: ['/pages/agendamentos'], icon: 'pi pi-fw pi-calendar'
                         },
+                        {
+                            label: "AIMS Interativa", routerLink: ['/pages/amis'], icon: 'pi pi-fw pi-chart-line'
+                        },
                 
                     ]  
                 }, 

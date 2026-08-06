@@ -1,0 +1,96 @@
+
+<div class="grid">
+  <div class="col-12">
+    <div class="card px-6 py-6">
+
+<main class="amis-page tela-avaliacao">
+  <header class="amis-header">
+   
+    <div class="actions">
+      <button type="button" class="light" (click)="imprimir()">
+        <i class="pi pi-print"></i><span>Imprimir / PDF</span>
+      </button>
+      <button type="button" class="outline" (click)="novaAvaliacao()">
+        <i class="pi pi-refresh"></i><span>Nova avaliação</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="panel patient">
+    <div class="section-title"><i class="pi pi-clipboard"></i><div><h2>Dados da avaliação</h2><p>Identificação e referência para o cálculo da idade</p></div></div>
+    <div class="form-grid">
+      <label><span>Nome da criança</span><input [(ngModel)]="paciente.nome" (ngModelChange)="atualizar()" placeholder="Nome completo"></label>
+      <label><span>Registro / prontuário</span><input [(ngModel)]="paciente.registro" (ngModelChange)="atualizar()"></label>
+      <label><span>Avaliador(a)</span><input [(ngModel)]="paciente.avaliador" (ngModelChange)="atualizar()"></label>
+      <label><span>Local da avaliação</span><input [(ngModel)]="paciente.local" (ngModelChange)="atualizar()"></label>
+      <label><span>Data de nascimento</span><input type="date" [(ngModel)]="paciente.dataNasc" (ngModelChange)="atualizar()"></label>
+      <label><span>Data da avaliação</span><input type="date" [(ngModel)]="paciente.dataAval" (ngModelChange)="atualizar()"></label>
+      <label><span>Semanas de gestação ao nascer</span><input type="number" min="20" max="42" [(ngModel)]="paciente.semGestacao" (ngModelChange)="atualizar()" placeholder="40 = a termo"></label>
+    </div>
+    <label class="check-row"><input type="checkbox" [(ngModel)]="paciente.usarCorrigida" (ngModelChange)="atualizar()"><span>Usar idade corrigida na classificação (recomendado para prematuros com menos de 37 semanas)</span></label>
+    <div class="age-strip"><div><span>Idade cronológica</span><strong>{{ formatarIdade(idadeCronologica) }}</strong></div><div><span>Idade corrigida</span><strong>{{ formatarIdade(idadeCorrigida) }}</strong></div></div>
+  </section>
+
+  <section class="scales" aria-label="Subescalas AIMS">
+    <article class="scale" *ngFor="let sub of subescalas" [style.--scale-color]="sub.cor">
+      <button type="button" class="scale-head" (click)="sub.aberta = !sub.aberta" [attr.aria-expanded]="sub.aberta">
+        <span class="scale-name"><i [class]="sub.icone"></i><strong>{{ sub.nome }}</strong><span class="count">{{ contar(sub) }} / {{ sub.itens.length }}</span></span><i class="pi pi-chevron-down chevron" [class.open]="sub.aberta"></i>
+      </button>
+      <div class="items" *ngIf="sub.aberta">
+        <button type="button" class="item" *ngFor="let item of sub.itens; let i = index" [class.checked]="item.marcado" (click)="alternarItem(item)" [attr.aria-pressed]="item.marcado">
+          <span class="number">{{ i + 1 }}</span><span class="item-copy"><strong>{{ item.titulo }}</strong><span *ngFor="let criterio of item.criterios">{{ criterio }}</span></span><span class="switch"><span></span></span>
+        </button>
+      </div>
+    </article>
+  </section>
+
+  <section class="panel results">
+    <div class="section-title"><i class="pi pi-chart-line"></i><div><h2>Resultado da avaliação</h2><p>Pontuação calculada pela janela motora observada</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Posição</th><th>Prévios</th><th>Na janela</th><th>Subescala</th></tr></thead><tbody><tr *ngFor="let sub of subescalas"><td><span class="dot" [style.background]="sub.cor"></span>{{ sub.nome }}</td><td>{{ pontuar(sub).previos }}</td><td>{{ pontuar(sub).janela }}</td><td><strong>{{ pontuar(sub).total }}</strong></td></tr></tbody></table></div>
+    <div class="score-band"><div><span>Pontuação total</span><strong>{{ total }} <small>/ 58</small></strong></div><div class="classification" [ngClass]="classificacao.classe">{{ classificacao.texto }}</div></div>
+    <div class="chart-wrap"><canvas #grafico width="900" height="440" aria-label="Gráfico de percentis AIMS"></canvas></div>
+    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
+    <div class="history-example"><strong>Exemplo de evolução</strong><span *ngFor="let ponto of historicoExemplo">{{ ponto.idadeMeses }} mês: {{ ponto.pontuacao }} pontos</span></div>
+    <p class="note">O gráfico de percentis foi digitalizado a partir da curva de referência da Escala Motora Infantil de Alberta (Piper &amp; Darrah) e serve como apoio visual e educativo. Para decisões clínicas formais, utilize a tabela normativa oficial do manual da AIMS.</p>
+    <label class="observations"><span>Observações / Recomendações</span><textarea rows="4" [(ngModel)]="observacoes" (ngModelChange)="atualizar()" placeholder="Registre observações clínicas, recomendações e condutas"></textarea></label>
+  </section>
+  <footer>Ferramenta auxiliar baseada na Alberta Infant Motor Scale. Não substitui o julgamento clínico profissional. Os dados ficam armazenados apenas neste navegador.</footer>
+</main>
+
+<main class="relatorio-impressao" aria-label="Relatório da avaliação AIMS">
+  <header class="relatorio-cabecalho">
+    <span>Avaliação motora infantil</span>
+    <h1>Escala Motora Infantil de Alberta (AIMS)</h1>
+  </header>
+
+  <section class="relatorio-identificacao">
+    <h2>Dados da avaliação</h2>
+    <dl>
+      <div><dt>Nome da criança</dt><dd>{{ paciente.nome || '—' }}</dd></div>
+      <div><dt>Registro / prontuário</dt><dd>{{ paciente.registro || '—' }}</dd></div>
+      <div><dt>Avaliador(a)</dt><dd>{{ paciente.avaliador || '—' }}</dd></div>
+      <div><dt>Data de nascimento</dt><dd>{{ formatarData(paciente.dataNasc) }}</dd></div>
+      <div><dt>Data da avaliação</dt><dd>{{ formatarData(paciente.dataAval) }}</dd></div>
+      <div><dt>Semanas de gestação</dt><dd>{{ formatarGestacao() }}</dd></div>
+      <div><dt>Idade cronológica</dt><dd>{{ formatarIdade(idadeCronologica) }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="relatorio-secao" *ngFor="let sub of subescalasSelecionadas" [style.--scale-color]="sub.cor">
+    <h2>{{ sub.nome }}</h2>
+    <article class="relatorio-item" *ngFor="let item of itensSelecionados(sub); let i = index">
+      <h3>{{ i + 1 }}. {{ item.titulo }}</h3>
+      <ul><li *ngFor="let criterio of item.criterios">{{ criterio }}</li></ul>
+    </article>
+    <p class="relatorio-subtotal">Pontuação da subescala: <strong>{{ pontuar(sub).total }}</strong></p>
+  </section>
+
+  <section class="relatorio-resultado">
+    <h2>Resultado da avaliação</h2>
+    <p class="relatorio-score">Pontuação total: <strong>{{ total }} / 58</strong></p>
+    <p>{{ classificacao.texto }}</p>
+    <img *ngIf="graficoParaImpressao" [src]="graficoParaImpressao" alt="Gráfico de percentis AIMS">
+    <div class="legend"><span *ngFor="let p of [5,10,25,50,75,90]"><i [style.background]="cores[p]"></i>Percentil {{ p }}</span><span><i class="history"></i>Evolução mensal (exemplo)</span><span><i class="child"></i>Criança avaliada</span></div>
+    <div class="history-example"><strong>Exemplo de evolução</strong><span *ngFor="let ponto of historicoExemplo">{{ ponto.idadeMeses }} mês: {{ ponto.pontuacao }} pontos</span></div>
+  </section>
+</main>

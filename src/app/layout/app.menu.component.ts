@@ -38,6 +38,9 @@ export class AppMenuComponent implements OnInit {
                         {
                             label: "AIMS Interativa", routerLink: ['/pages/amis'], icon: 'pi pi-fw pi-chart-line'
                         },
+                        {
+                            label: "Craniometria", routerLink: ['/pages/craniometria'], icon: 'pi pi-fw pi-chart-bar'
+                        },
                 
                     ]  
                 }, 

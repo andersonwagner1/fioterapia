@@ -27,6 +27,7 @@ import { authGuard } from './conta/guard/AuthGuard.component';
                     { path: 'pages/prontuario', loadChildren: () => import('./conta/page/pagina/prontuario/prontuarioForm.module').then(m => m.ProntuarioFormModule), canActivate: [authGuard]  },
                     { path: 'pages/agendamentos', loadChildren: () => import('./conta/page/pagina/agendamento/agendamento.module').then(m => m.AgendamentoModule) , canActivate: [authGuard] }, // <-- Nova Rota
                     { path: 'pages/amis', loadChildren: () => import('./conta/page/pagina/amis/amis.module').then(m => m.AmisModule), canActivate: [authGuard] },
+                    { path: 'pages/craniometria', loadChildren: () => import('./conta/page/pagina/craniometria/craniometria.module').then(m => m.CraniometriaModule), canActivate: [authGuard] },
                     { path: 'pages/usuario-config', loadChildren: () => import('./conta/page/acesso/perfil/usuarios-config.module').then(m => m.UsuariosConfigModule) , canActivate: [authGuard] },                   
                 ],                 
                

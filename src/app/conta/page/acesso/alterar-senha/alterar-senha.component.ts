@@ -5,7 +5,8 @@ import { BasePermissaoComponent } from '../../base-permissao.component';
 
 @Component({
   selector: 'app-alterar-senha',
-  templateUrl: './alterar-senha.component.html'
+  templateUrl: './alterar-senha.component.html',
+  
 })
 export class AlterarSenhaComponent extends BasePermissaoComponent implements OnInit {
 
